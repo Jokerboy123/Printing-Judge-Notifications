@@ -6,52 +6,251 @@
         xmlns:local="clr-namespace:Printing_Judge_Notifications"
         mc:Ignorable="d"
         Title="Печать уведомлений"
-        Width="900" Height="615"
+        Width="1000" Height="700"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized">
 
+    <!-- СТИЛИ -->
+    <Window.Resources>
+        <!-- Стиль главной (зеленой) кнопки -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#2E7D32"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#1B5E20"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#138808"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль вторичных (белых) кнопок -->
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#D1D5DB"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6" 
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F9FAFB"/>
+                                <Setter Property="BorderBrush" Value="#9CA3AF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#E5E7EB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
     <Grid Margin="12">
-        <Grid.ColumnDefinitions>
-            <!-- Две колонки, чтобы кнопка и прогресс-бар могли быть в правой или левой части при желании -->
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <!-- Верхняя строка: кнопка -->
+            <!-- Панель действий -->
             <RowDefinition Height="*"/>
-            <!-- Средняя строка: DataGrid на всё оставшееся место -->
+            <!-- DataGrid -->
             <RowDefinition Height="5"/>
-            <!-- Нижняя строка: ровно 5 мм под прогресс-бар -->
+            <!-- Прогресс-бар -->
         </Grid.RowDefinitions>
 
-        <!-- Кнопка загрузки файла -->
+        <!-- ========================================== -->
+        <!-- ИСПРАВЛЕННАЯ ПАНЕЛЬ ДЕЙСТВИЙ (4 РАВНЫЕ КОЛОНКИ) -->
+        <!-- ========================================== -->
+        <Border  Grid.Row="0" Margin="0,0,0,15" Background="White">
+            <Grid>
+                <!-- 
+                   ВАЖНО: 4 колонки одинаковой ширины (*) + 3 разделителя (10)
+                   Колонка 0: Кнопка "Загрузить"
+                   Колонка 1: Отступ
+                   Колонка 2: Блок "Возбуждение (Печать)"
+                   Колонка 3: Отступ
+                   Колонка 4: Блок "Возбуждение (PDF)"
+                   Колонка 5: Отступ
+                   Колонка 6: Блок "Прекращение (PDF)"
+                -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <!-- 0: Кнопка загрузки -->
+                    <ColumnDefinition Width="10"/>
+                    <!-- 1: Отступ -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- 2: Блок 1 -->
+                    <ColumnDefinition Width="10"/>
+                    <!-- 3: Отступ -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- 4: Блок 2 -->
+                    <ColumnDefinition Width="10"/>
+                    <!-- 5: Отступ -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- 6: Блок 3 -->
+                </Grid.ColumnDefinitions>
 
+                <!-- ГЛАВНАЯ КНОПКА (Колонка 0) -->
+                <Button x:Name="UploadFileButton"
+                        Content="Загрузить файл"
+                        Click="UploadFileButton_Click"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Grid.Column="0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        MinHeight="50"/>
 
+                <!-- БЛОК 1: Возбуждение ИП (Печать) (Колонка 2) -->
+                <!-- БЛОК 1: Возбуждение ИП (Печать + PDF) -->
+                <Border Grid.Column="2" 
+        Background="White" 
+        BorderBrush="#E5E7EB" 
+        BorderThickness="1" 
+        CornerRadius="8" 
+        Padding="15">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- Заголовок -->
+                            <RowDefinition Height="*"/>
+                            <!-- Кнопки -->
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Заявление о возбуждении ИП" 
+                   FontWeight="Bold" 
+                   FontSize="13" 
+                   Foreground="#4B5563" 
+                   TextWrapping="Wrap"
+                   TextAlignment="Center"
+                   Margin="0,0,0,12"
+                   Grid.Row="0"/>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <!-- Небольшой отступ между кнопками -->
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Content="Печать"
+                    Click="InitiationIP_PrintOut_Click"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Grid.Column="0"/>
+
+                            <Button Content="PDF"
+                    Click="InitiationIP_PDF_Click"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Grid.Column="2"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- БЛОК 2: Возбуждение ИП (PDF) - если нужен отдельный блок, но судя по скриншоту, это часть первого блока. 
+    -->
+                <Border Grid.Column="3" 
+                    Background="White" 
+                    BorderBrush="#E5E7EB" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="15" Grid.ColumnSpan="3" Margin="9,0,10,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- Кнопки -->
+                            <!-- Заголовок -->
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Заявление о прекращении ИП" 
+                            FontWeight="Bold" 
+                            FontSize="13" 
+                            Foreground="#4B5563" 
+                            TextWrapping="Wrap"
+                            TextAlignment="Center"
+                            Margin="0,0,0,12"
+                            Grid.Row="0"/>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="5"/>
+                                <!-- Небольшой отступ между кнопками -->
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <Button Content="Печать"
+                                Click="InitiationIP_PrintOut_Click"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Grid.Column="0"/>
+
+                            <Button Content="PDF"
+                                Click="InitiationIP_PDF_Click"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Grid.Column="2"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+            </Grid>
+        </Border>
+
+        <!-- ========================================== -->
+        <!-- DATAGRID (ИСПРАВЛЕНЫ ЗАГОЛОВКИ И КОЛОНКИ) -->
+        <!-- ========================================== -->
         <DataGrid x:Name="dataGrid"
-          Grid.Row="1"
-          Grid.Column="0"
-          Grid.ColumnSpan="2"
-          AutoGenerateColumns="False"
-          CanUserResizeColumns="True"
-          CanUserResizeRows="True"
-          CanUserAddRows="False"
-          IsReadOnly="True"
-          ScrollViewer.HorizontalScrollBarVisibility="Visible"
-          GridLinesVisibility="All"
-          HorizontalGridLinesBrush="#CCCCCC"
-          VerticalGridLinesBrush="#CCCCCC"
-          RowBackground="#FFFFFF"
-          AlternatingRowBackground="#F9F9F9"
-          BorderThickness="0"
-          Margin="0"
-          
-            VirtualizingStackPanel.IsVirtualizing="True"
-          VirtualizingStackPanel.VirtualizationMode="Recycling"
-          VirtualizingPanel.ScrollUnit="Pixel"
-          >
+                  Grid.Row="1"
+                  AutoGenerateColumns="False"
+                  CanUserResizeColumns="True"
+                  CanUserResizeRows="True"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                  GridLinesVisibility="All"
+                  HorizontalGridLinesBrush="#CCCCCC"
+                  VerticalGridLinesBrush="#CCCCCC"
+                  RowBackground="#FFFFFF"
+                  AlternatingRowBackground="#F9F9F9"
+                  BorderThickness="0"
+                  Margin="0"
+                  VirtualizingStackPanel.IsVirtualizing="True"
+                  VirtualizingStackPanel.VirtualizationMode="Recycling"
+                  VirtualizingPanel.ScrollUnit="Pixel">
 
-            <!-- Стиль заголовка: жирный, центрированный, без лишних рамок -->
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
                     <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -64,7 +263,6 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
 
-            <!-- Стиль ячейки: рамка, аккуратные отступы -->
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Setter Property="BorderThickness" Value="0,1,1,0"/>
@@ -78,7 +276,7 @@
                 <!-- 1. Судебный пристав -->
                 <DataGridTextColumn Binding="{Binding CourtOfficer}" Width="Auto" MinWidth="200">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Судебный пристав и иная информация" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Судебный пристав и иная информация"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -91,7 +289,7 @@
                 <!-- 2. Дата проверки -->
                 <DataGridTextColumn Binding="{Binding DateOfVerification, StringFormat={}{0:dd.MM.yyyy}}" Width="110">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Дата проверки" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Дата проверки"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -103,7 +301,7 @@
                 <!-- 3. № судебного участка -->
                 <DataGridTextColumn Binding="{Binding NumberOfJudicalArea}" Width="110">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="№ судебного участка" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="№ судебного участка"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -115,14 +313,14 @@
                 <!-- 4. Лицевой счёт -->
                 <DataGridTextColumn Binding="{Binding Account}" Width="120">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Лицевой счёт" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Лицевой счёт"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                 </DataGridTextColumn>
 
                 <!-- 5. ФИО должника -->
                 <DataGridTextColumn Binding="{Binding FullName}" Width="Auto" MinWidth="180">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="ФИО должника" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="ФИО должника"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -135,7 +333,7 @@
                 <!-- 6. Доля в праве -->
                 <DataGridTextColumn Binding="{Binding Part}" Width="90">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Доля в праве" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Доля в праве"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -147,7 +345,7 @@
                 <!-- 7. Населённый пункт -->
                 <DataGridTextColumn Binding="{Binding Town}" Width="130">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Населённый пункт" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Населённый пункт"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -160,7 +358,7 @@
                 <!-- 8. Улица -->
                 <DataGridTextColumn Binding="{Binding Street}" Width="140">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Улица" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Улица"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -173,7 +371,7 @@
                 <!-- 9. Дом -->
                 <DataGridTextColumn Binding="{Binding Building}" Width="60">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Дом" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Дом"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -185,7 +383,7 @@
                 <!-- 10. Корпус -->
                 <DataGridTextColumn Binding="{Binding Korps}" Width="60">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Корпус" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Корпус"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -197,7 +395,7 @@
                 <!-- 11. Квартира -->
                 <DataGridTextColumn Binding="{Binding Flat}" Width="60">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Квартира" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Квартира"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -209,7 +407,7 @@
                 <!-- 12. Комната -->
                 <DataGridTextColumn Binding="{Binding Room}" Width="60">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Комната" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Комната"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -221,7 +419,7 @@
                 <!-- 13. Дата передачи MC -->
                 <DataGridTextColumn Binding="{Binding RequestMCDate, StringFormat={}{0:dd.MM.yyyy}}" Width="100">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Дата передачи MC" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Дата передачи MC"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -233,19 +431,7 @@
                 <!-- 14. № СП -->
                 <DataGridTextColumn Binding="{Binding OrderNumber}" Width="Auto" MinWidth="180">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="№ СП" TextWrapping="Wrap" TextAlignment="Center"/>
-                    </DataGridTextColumn.Header>
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="TextWrapping" Value="Wrap"/>
-                            <Setter Property="VerticalAlignment" Value="Top"/>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <!-- 14. № СП -->
-                <DataGridTextColumn Binding="{Binding OrderDate}" Width="Auto" MinWidth="180">
-                    <DataGridTextColumn.Header>
-                        <TextBlock Text="№ СП" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="№ СП"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -255,10 +441,23 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- 15. Дата передачи ФССП -->
+                <!-- 15. Дата СП (ИСПРАВЛЕНО: было дублирование заголовка "№ СП") -->
+                <DataGridTextColumn Binding="{Binding OrderDate, StringFormat={}{0:dd.MM.yyyy}}" Width="Auto" MinWidth="180">
+                    <DataGridTextColumn.Header>
+                        <TextBlock Text="Дата СП"  TextAlignment="Center"/>
+                    </DataGridTextColumn.Header>
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                            <Setter Property="VerticalAlignment" Value="Top"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <!-- 16. Дата передачи ФССП -->
                 <DataGridTextColumn Binding="{Binding TransferDateFSSP, StringFormat={}{0:dd.MM.yyyy}}" Width="100">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Дата передачи ФССП" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Дата передачи ФССП"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -267,10 +466,10 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- 16. Дата возбуждения ИП -->
+                <!-- 17. Дата возбуждения ИП -->
                 <DataGridTextColumn Binding="{Binding InitiationDate, StringFormat={}{0:dd.MM.yyyy}}" Width="100">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Дата возбуждения ИП" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Дата возбуждения ИП"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -280,10 +479,10 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- 17. Примечание -->
+                <!-- 18. Примечание -->
                 <DataGridTextColumn Binding="{Binding Appendex}" Width="Auto" MinWidth="180">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Примечание" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Примечание"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -293,10 +492,10 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- 18. Дата рождения -->
-                <DataGridTextColumn Binding="{Binding BirthDate}" Width="Auto" MinWidth="160">
+                <!-- 19. Дата рождения -->
+                <DataGridTextColumn Binding="{Binding BirthDate, StringFormat={}{0:dd.MM.yyyy}}" Width="Auto" MinWidth="160">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Дата рождения должника" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Дата рождения должника"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -305,10 +504,10 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- 19. Период -->
+                <!-- 20. Период -->
                 <DataGridTextColumn Binding="{Binding Period}" Width="Auto" MinWidth="180">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Период" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Период"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -321,7 +520,7 @@
                 <!-- Суммы: выравнивание по правому краю -->
                 <DataGridTextColumn Binding="{Binding Debt, StringFormat=N2}" Width="110">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Основной долг" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Основной долг"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -332,7 +531,7 @@
 
                 <DataGridTextColumn Binding="{Binding Punishment, StringFormat=N2}" Width="110">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Сумма пени" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Сумма пени"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -343,7 +542,7 @@
 
                 <DataGridTextColumn Binding="{Binding Duty, StringFormat=N2}" Width="130">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Госпошлина" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Госпошлина"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -354,7 +553,7 @@
 
                 <DataGridTextColumn Binding="{Binding AmountSum, StringFormat=N2}" Width="130">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Сумма по исполнительному документу" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Сумма по исполнительному документу"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -366,7 +565,7 @@
                 <!-- Документ -->
                 <DataGridTextColumn Binding="{Binding DocumentReference}" Width="Auto" MinWidth="160">
                     <DataGridTextColumn.Header>
-                        <TextBlock Text="Документ" TextWrapping="Wrap" TextAlignment="Center"/>
+                        <TextBlock Text="Документ"  TextAlignment="Center"/>
                     </DataGridTextColumn.Header>
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -378,73 +577,13 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Прогресс-бар: строго в нижней строке высотой 5 мм, растягивается по ширине колонки -->
+        <!-- Прогресс-бар -->
         <ProgressBar x:Name="progressBar1"
                      Visibility="Collapsed"
-                     Margin="0,1,0,-6"
-                     Height="10"
+                     Height="5"
                      Grid.Row="2"
-                     
-                     Grid.Column="0"/>
-        <UniformGrid Rows="1" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,5">
-            <Button x:Name="UploadFileButton"
-            Content="Загрузить файл"
-            Click="UploadFileButton_Click"
-            Padding="8">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="MinWidth" Value="180"/>
-                        <Setter Property="MinHeight" Value="40"/>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-            <Button x:Name="InitiationIP_PrintOut"
-            Click="InitiationIP_PrintOut_Click"
-            Padding="8">
-                <TextBlock Text="Заявление о возбуждении ИП распечатать"
-                   TextWrapping="Wrap"
-                   TextAlignment="Center"
-                   VerticalAlignment="Center"/>
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="MinWidth" Value="180"/>
-                        <Setter Property="MinHeight" Value="40"/>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-            <Button x:Name="InitiationIP_PDF"
-            Click ="InitiationIP_PDF_Click"
-            Padding="8">
-                <TextBlock Text="Заявление о ВОЗБУЖДЕНИИ ИП PDF"
-                   TextWrapping="Wrap"
-                   TextAlignment="Center"
-                   VerticalAlignment="Center"/>
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="MinWidth" Value="180"/>
-                        <Setter Property="MinHeight" Value="40"/>
-                    </Style>
-                </Button.Style>
-            </Button>
-
-            <Button x:Name="CancelIP_PDF"
-            Click="CancelIP_PDF_Click"
-            Padding="8">
-                <TextBlock Text="Заявление о ПРЕКРАЩЕНИИ ИП PDF"
-                   TextWrapping="Wrap"
-                   TextAlignment="Center"
-                   VerticalAlignment="Center"/>
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="MinWidth" Value="180"/>
-                        <Setter Property="MinHeight" Value="40"/>
-                    </Style>
-                </Button.Style>
-            </Button>
-        </UniformGrid>
-
-       
+                     Grid.Column="0"
+                     Grid.ColumnSpan="7"
+                     Margin="0"/>
     </Grid>
 </Window>

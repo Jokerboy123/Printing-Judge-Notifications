@@ -11,7 +11,7 @@ namespace Printing_Judge_Notifications
     /* B */ public DateTime? DateOfVerification { get; set; } // Дата проверки информации...
     /* C */ public string NumberOfJudicalArea { get; set; } = "";// № Судебного участка
     /* D */ public string Account { get; set; } = "";    /**//**/// Лицевой счет
-    /* E */ public string FullName { get; set; } = "";    /**/  // ФИО должника (обрати внимание: в XAML опечатка FullName с 3 'l')
+    /* E */ public string FullName { get; set; } = "";   
     /* F */ public string Part { get; set; } = "";
     /* G */ public string Town { get; set; } = "";
     /* H */ public string Street { get; set; } = "";
