@@ -15,6 +15,8 @@ namespace Printing_Judge_Notifications
         /// Извлекает вторую фамилию из скобок ТОЛЬКО из переданной строки.
         /// Возвращает очищенную строку и вторую фамилию отдельно.
         /// </summary>
+        
+        
         private static (string cleaned, string secondSurname) ExtractSecondSurnameFromSegment(string input)
         {
             string cleaned = input;
@@ -76,7 +78,7 @@ namespace Printing_Judge_Notifications
             return (surname, name, patronymicBase, suffix);
         }
 
-        public void GenerateTemplate(string templatePath, string outputPath, OwnerData data)
+        public void GenerateTemplate(string templatePath, string outputPath, OwnerData data, int townNumber)
         {
             string AddPart(string current, string prefix, string value)
             {
@@ -249,6 +251,47 @@ namespace Printing_Judge_Notifications
             var orderNumber = data.OrderNumber.ToString();
             string amountSum = data.AmountSum.ToString();
 
+            string placement = "";
+            string officer = "";
+            string officer_address = "";
+            string officer_street = "";
+
+            switch (townNumber)
+            {
+                case 1:
+                    placement = "Курского";
+                    officer = "А. И. Заргарову";
+                    officer_address = "357850, Ставропольский край, ст. Курская";
+                    officer_street = "пр. Комсомольский, 8";
+                    break;
+                case 2:
+                    placement = "Степновского";
+                    officer = "О. В. Балдовой";
+                    officer_address = "357930, Ставропольский край, с. Степное";
+                    officer_street = "пл. Ленина, 17а";
+                    break;
+                case 3:
+                    placement = "Советского";
+                    officer = "А. Г. Ржевскому";
+                    officer_address = "357914, Ставропольский край, г. Зеленокумск";
+                    officer_street = "ул. 50 лет Октября, 51";
+                    break;
+                case 4:
+                    placement = "Георгиевского";
+                    officer = "А. П. Капуста";
+                    officer_address = "357820, Ставропольский край, г. Георгиевск";
+                    officer_street = "ул. Калинина, 10";
+                    break;
+                case 5:
+                    placement = "Кировского";
+                    officer = "Т. С. Коробейниковой";
+                    officer_address = "357300, Ставропольский край, г. Новопавловск";
+                    officer_street = "ул. Мира, 190 Б";
+                    break;
+                default:
+                    break;
+            }
+
             var replacements = new Dictionary<string, string>
             {
                 {"{{TODAYDATE}}", DateTime.Now.Date.ToString("dd.MM.yyyy")},
@@ -258,10 +301,10 @@ namespace Printing_Judge_Notifications
                 {"{{CHILD_FULLNAME}}", genitiveCaseChildFullName.Trim() ?? ""},
                 {"{{PARENT_FULLNAME}}", !string.IsNullOrEmpty(genitiveCaseParentFullName) ? genitiveCaseParentFullName.Trim() : ""},
                 {"{{ADDRESS}}", fullAddress.Trim()},
-                {"{{PLACEMENT}}", "" },
-                {"{{OFFICER}}", " "}    ,
-                {"{{OFFICER_ADDRESS}}", ""},
-                {"{{OFFICER_STREET}}", ""}
+                {"{{PLACEMENT}}", placement },
+                {"{{OFFICER}}", officer}    ,
+                {"{{OFFICER_ADDRESS}}", officer_address},
+                {"{{OFFICER_STREET}}", officer_street}
             };
 
             InitiateDocument(templatePath, outputPath, replacements);

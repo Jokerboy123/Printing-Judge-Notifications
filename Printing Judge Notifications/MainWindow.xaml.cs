@@ -249,7 +249,21 @@ namespace Printing_Judge_Notifications
 
             return null;
         }
+        private int GetCheckedTownNumber()
+        {
+            var buttons = new[] { KURSK, GEO, SOVET, STEPN, NOVOP };
+            var selected = buttons.FirstOrDefault(rb => rb.IsChecked == true);
 
+            if (selected == null)
+            {
+                MessageBox.Show("Необходимо выбрать отделение!");
+                return 0;
+            }
+           if(int.TryParse(selected.Tag?.ToString(), out int townNumber))
+              return townNumber;
+
+            return 0;
+        }
         private void InitiationIP_PDF_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = dataGrid.SelectedItems.Cast<OwnerData>().ToList();
@@ -259,48 +273,54 @@ namespace Printing_Judge_Notifications
                 return;
             }
 
-            var data = selectedItems.First();
-            //   string baseDir = Environment.UserName + @"C:\Users\Ларина\source\repos\Printing-Judge-Notifications\Printing Judge Notifications";
-            string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
 
-            string templatePath = "";
-            // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
-            if (data.FullName.Contains(" за "))
+            foreach (var data in selectedItems)
             {
-                templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_CHILD.docx");
-            }
-            else
-            {
-                templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_ADULT.docx");
-            }
-            string outputDir = Path.Combine(baseDir, "Output");
-            Directory.CreateDirectory(outputDir);
-            if (!File.Exists(templatePath))
-            {
-                MessageBox.Show($"Шаблон не найден в папке {templatePath}");
-                return; 
-            }
-            try
-            {
-                var printer = new DocumentPrinter();
-                string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
-                string fileName = $"Заявление о возбуждении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
-                string outputPath = Path.Combine(outputDir, fileName);
-                printer.GenerateTemplate(templatePath, outputPath, data);
 
-                Process.Start(new ProcessStartInfo
+                int townNumber = GetCheckedTownNumber();
+                if (townNumber == 0) return; // ничего не выбрано
+
+                string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
+
+                string templatePath = "";
+                // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
+                if (data.FullName.Contains(" за "))
                 {
-                    FileName = outputPath,
-                    UseShellExecute = true,
-                    Verb = "Open",
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_CHILD.docx");
+                }
+                else
+                {
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_ADULT.docx");
+                }
+                string outputDir = Path.Combine(baseDir, "Output");
+                Directory.CreateDirectory(outputDir);
+                if (!File.Exists(templatePath))
+                {
+                    MessageBox.Show($"Шаблон не найден в папке {templatePath}");
+                    return;
+                }
+                try
+                {
+                    var printer = new DocumentPrinter();
+                    string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
+                    string fileName = $"Заявление о возбуждении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
+                    string outputPath = Path.Combine(outputDir, fileName);
+                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
 
-                });
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = outputPath,
+                        UseShellExecute = true,
+                        Verb = "Open",
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
 
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                }
             }
         }
         private void InitiationIP_PrintOut_Click(object sender, RoutedEventArgs e)
@@ -312,40 +332,59 @@ namespace Printing_Judge_Notifications
                 return;
             }
 
-            var data = selectedItems.First();
-            string baseDir = @"C:\Users\Ларина\source\repos\Printing Judge Notifications\Printing Judge Notifications";
-            // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
 
-            string templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_ADULT.docx");
-            string outputDir = Path.Combine(baseDir, "Output");
-            Directory.CreateDirectory(outputDir);
-            if (!File.Exists(templatePath))
+            foreach (var data in selectedItems)
             {
-                MessageBox.Show($"Шаблон не найден в папке {templatePath}");
-                return;
-            }
-            try
-            {
-                var printer = new DocumentPrinter();
-                string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
-                string fileName = $"Заявление о возбуждении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
-                string outputPath = Path.Combine(outputDir, fileName);
-                printer.GenerateTemplate(templatePath, outputPath, data);
 
-                Process.Start(new ProcessStartInfo
+                int townNumber = GetCheckedTownNumber();
+                if (townNumber == 0) return; // ничего не выбрано
+
+
+                string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
+                // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
+
+                string templatePath = "";
+                // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
+                if (data.FullName.Contains(" за "))
                 {
-                    FileName = outputPath,
-                    UseShellExecute = true,
-                    Verb = "Print",
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_CHILD.docx");
+                }
+                else
+                {
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_ADULT.docx");
+                }
+                string outputDir = Path.Combine(baseDir, "Output");
+                Directory.CreateDirectory(outputDir);
+                if (!File.Exists(templatePath))
+                {
+                    MessageBox.Show($"Шаблон не найден в папке {templatePath}");
+                    return;
+                }
+                try
+                {
+                    var printer = new DocumentPrinter();
+                    string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
+                    string fileName = $"Заявление о возбуждении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
+                    string outputPath = Path.Combine(outputDir, fileName);
 
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
 
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = outputPath,
+                        UseShellExecute = true,
+                        Verb = "Print",
+
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                }
             }
         }
+
         private void CancelIP_PDF_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = dataGrid.SelectedItems.Cast<OwnerData>().ToList();
@@ -355,48 +394,64 @@ namespace Printing_Judge_Notifications
                 return;
             }
 
-            // пройтись по массиву selectedItems и провести эту манипуляцию для каждого элемента массива
-            var data = selectedItems.First();
 
-            string baseDir = (@"C:\Users\Ларина\source\repos\Printing Judge Notifications\Printing Judge Notifications");
-            string templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_ADULT.docx");
-            string outputDir = Path.Combine(baseDir, "Output");
-
-            Directory.CreateDirectory(outputDir);
-
-            if (!File.Exists(templatePath))
+            foreach (var data in selectedItems)
             {
-                MessageBox.Show($"Шаблон не найден в папке {templatePath}");
-                return;
-            }
-            try
-            {
-                var printer = new DocumentPrinter();
 
-                // 3. Формируем безопасное имя файла (убираем запрещенные символы из ФИО)
-                string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
-                string fileName = $"Заявление_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
-                string outputPath = Path.Combine(outputDir, fileName);
+                int townNumber = GetCheckedTownNumber();
+                if (townNumber == 0) return; // ничего не выбрано
 
-                printer.GenerateTemplate(templatePath, outputPath, data);
 
-                Process.Start(new ProcessStartInfo
+                string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
+                string templatePath = "";
+                // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
+                if (data.FullName.Contains(" за "))
                 {
-                    FileName = outputPath,
-                    UseShellExecute = true,
-                    Verb = "Open",
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_CHILD.docx");
+                }
+                else
+                {
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_ADULT.docx");
+                }
+                string outputDir = Path.Combine(baseDir, "Output");
+                Directory.CreateDirectory(outputDir); 
 
-                });
+
+                if (!File.Exists(templatePath))
+                {
+                    MessageBox.Show($"Шаблон не найден в папке {templatePath}");
+                    return;
+                }
+                try
+                {
+                    var printer = new DocumentPrinter();
+
+                    // 3. Формируем безопасное имя файла (убираем запрещенные символы из ФИО)
+                    string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
+                    string fileName = $"Заявление_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
+                    string outputPath = Path.Combine(outputDir, fileName);
+
+                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
+
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = outputPath,
+                        UseShellExecute = true,
+                        Verb = "Open",
+
+                    });
 
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
 
+                }
             }
         }
-        private void CancelIP_PDF_PRINTOUT_Click(object sender, RoutedEventArgs e)
+
+        private void CancelIP_PrintOut_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = dataGrid.SelectedItems.Cast<OwnerData>().ToList();
             if (!selectedItems.Any())
@@ -405,54 +460,58 @@ namespace Printing_Judge_Notifications
                 return;
             }
 
-            // пройтись по массиву selectedItems и провести эту манипуляцию для каждого элемента массива
-            var data = selectedItems.First();
-          
-            string baseDir = @"C:\Users\Ларина\source\repos\Printing Judge Notifications\Printing Judge Notifications";
-            // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
 
-            string templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_ADULT.docx");
-
-            string outputDir = Path.Combine(baseDir, "Output");
-
-            Directory.CreateDirectory(outputDir);
-
-            if (!File.Exists(templatePath))
+            foreach (var data in selectedItems)
             {
-                MessageBox.Show($"Шаблон не найден в папке {templatePath}");
-                return;
-            }
-            try
-            {
-                var printer = new DocumentPrinter();
 
-                // 3. Формируем безопасное имя файла (убираем запрещенные символы из ФИО)
-                string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
-                string fileName = $"Заявление о прекращении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
-                string outputPath = Path.Combine(outputDir, fileName);
+                int townNumber = GetCheckedTownNumber();
+                if (townNumber == 0) return; // ничего не выбрано
 
-                printer.GenerateTemplate(templatePath, outputPath, data);
 
-                Process.Start(new ProcessStartInfo
+                string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
+                string templatePath = "";
+                // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
+                if (data.FullName.Contains(" за "))
                 {
-                    FileName = outputPath,
-                    UseShellExecute = true,
-                    Verb = "Print",
-                    
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_CHILD.docx");
+                }
+                else
+                {
+                    templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_ADULT.docx");
+                }
+                string outputDir = Path.Combine(baseDir, "Output");
+                Directory.CreateDirectory(outputDir);
 
+
+                
+                if (!File.Exists(templatePath))
+                {
+                    MessageBox.Show($"Шаблон не найден в папке {templatePath}");
+                    return;
+                }
+                try
+                {
+                    var printer = new DocumentPrinter();
+                    string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
+                    string fileName = $"Заявление о прекращении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
+                    string outputPath = Path.Combine(outputDir, fileName);
+
+                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
+
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = outputPath,
+                        UseShellExecute = true,
+                        Verb = "Print",
+
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                }
             }
         }
-
-       
-        //private void Button_Click_1(object sender, RoutedEventArgs e)
-        //{
-        //    string fullName = dataGrid.SelectedItem.GetMethod ToString();
-        //    MessageBox.Show(fullName);
-        //}
-    }
+        }
 }
