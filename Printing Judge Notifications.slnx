@@ -1,7 +1,6 @@
 <Solution>
   <Folder Name="/Элементы решения/">
     <File Path="RussianDeclension.cs" />
-    <File Path="TextFile1.txt" />
   </Folder>
   <Project Path="Printing Judge Notifications/Printing Judge Notifications.csproj" />
 </Solution>
