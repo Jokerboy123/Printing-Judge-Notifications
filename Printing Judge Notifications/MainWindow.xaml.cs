@@ -260,8 +260,7 @@ namespace Printing_Judge_Notifications
             }
 
             var data = selectedItems.First();
-
-            string baseDir = @"C:\Users\Ларина\source\repos\Printing Judge Notifications — копия\Printing Judge Notifications";
+            string baseDir = @"C:\Users\Ларина\source\repos\Printing-Judge-Notifications\Printing Judge Notifications";
             string templatePath = "";
             // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
             if (data.FullName.Contains(" за "))
