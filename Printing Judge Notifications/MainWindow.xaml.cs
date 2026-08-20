@@ -260,16 +260,18 @@ namespace Printing_Judge_Notifications
             }
 
             var data = selectedItems.First();
-            string baseDir = @"C:\Users\Ларина\source\repos\Printing-Judge-Notifications\Printing Judge Notifications";
+            //   string baseDir = Environment.UserName + @"C:\Users\Ларина\source\repos\Printing-Judge-Notifications\Printing Judge Notifications";
+            string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
+
             string templatePath = "";
             // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
             if (data.FullName.Contains(" за "))
             {
-                templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_INITIATION_CHILD.docx");
+                templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_CHILD.docx");
             }
             else
             {
-                templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_INITIATION_ADULT.docx");
+                templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_ADULT.docx");
             }
             string outputDir = Path.Combine(baseDir, "Output");
             Directory.CreateDirectory(outputDir);
@@ -314,7 +316,7 @@ namespace Printing_Judge_Notifications
             string baseDir = @"C:\Users\Ларина\source\repos\Printing Judge Notifications\Printing Judge Notifications";
             // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
 
-            string templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_INITIATION_ADULT.docx");
+            string templatePath = Path.Combine(baseDir, "TEMPLATE_INITIATION_ADULT.docx");
             string outputDir = Path.Combine(baseDir, "Output");
             Directory.CreateDirectory(outputDir);
             if (!File.Exists(templatePath))
@@ -357,7 +359,7 @@ namespace Printing_Judge_Notifications
             var data = selectedItems.First();
 
             string baseDir = (@"C:\Users\Ларина\source\repos\Printing Judge Notifications\Printing Judge Notifications");
-            string templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_CANCEL_ADULT.docx");
+            string templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_ADULT.docx");
             string outputDir = Path.Combine(baseDir, "Output");
 
             Directory.CreateDirectory(outputDir);
@@ -409,7 +411,7 @@ namespace Printing_Judge_Notifications
             string baseDir = @"C:\Users\Ларина\source\repos\Printing Judge Notifications\Printing Judge Notifications";
             // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
 
-            string templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_CANCEL_ADULT.docx");
+            string templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_ADULT.docx");
 
             string outputDir = Path.Combine(baseDir, "Output");
 
