@@ -239,7 +239,7 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
-                        <TextBlock Text="Заявление о прекращении ИП" 
+                        <TextBlock Text="Выбор отделения" 
                             FontWeight="Bold" 
                             FontSize="13" 
                             Foreground="#4B5563" 
@@ -251,24 +251,24 @@
                         <Grid Grid.Row="1">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="5"/>
+                                <ColumnDefinition Width="10"/>
                                 <!-- Небольшой отступ между кнопками -->
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="5"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="5"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
-                            <Button Content="Печать"
-                                Click="InitiationIP_PrintOut_Click"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                Grid.Column="0"/>
+                            <RadioButton GroupName="townChecked" x:Name="GEO" Grid.Column="0" Grid.Row="0" Content="Курское" ></RadioButton>
+                            <RadioButton GroupName="townChecked" x:Name="gggg" Grid.Column="0" Grid.Row="2" Content="Степновское" ></RadioButton>
+                            <RadioButton GroupName="townChecked" x:Name="ggdgg" Grid.Column="0" Grid.Row="4" Content="Советское" ></RadioButton>
+                            <RadioButton GroupName="townChecked" x:Name="bgbg" Grid.Column="2" Grid.Row="0" Content="Георгиевск" ></RadioButton>
+                            <RadioButton GroupName="townChecked" x:Name="кккк" Grid.Column="2" Grid.Row="2" Content="Новопавловск" ></RadioButton>
 
-                            <Button Content="PDF"
-                                Click="InitiationIP_PDF_Click"
-                                Style="{StaticResource SecondaryButtonStyle}"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Stretch"
-                                Grid.Column="2"/>
                         </Grid>
                     </Grid>
                 </Border>
