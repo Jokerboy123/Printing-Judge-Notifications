@@ -1,23 +1,16 @@
-using ClosedXML.Excel;
-using DocumentFormat.OpenXml.Packaging;
+﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using Windows.UI.Popups;
+using System.Globalization;
 
 namespace Printing_Judge_Notifications
 {
     public class DocumentPrinter
     {
-        private readonly MainWindow _mainWindow;
-        public DocumentPrinter(MainWindow mainWindow)
-        {
-            _mainWindow = mainWindow;
-        }
         /// <summary>
         /// Извлекает вторую фамилию из скобок ТОЛЬКО из переданной строки.
         /// Возвращает очищенную строку и вторую фамилию отдельно.
@@ -82,7 +75,6 @@ namespace Printing_Judge_Notifications
 
             return (surname, name, patronymicBase, suffix);
         }
-       
 
         public void GenerateTemplate(string templatePath, string outputPath, OwnerData data)
         {
@@ -146,14 +138,8 @@ namespace Printing_Judge_Notifications
                 var splitBySlash = fullName.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                 if (splitBySlash.Length >= 2)
                 {
-                    for(int i = 0; i< splitBySlash.Length; i++)
-                    {
-                        MessageBox.Show(splitBySlash[i]);
-                        childRaw = splitBySlash[i].Trim() + " ";
-                    }
-                    //parentRaw = splitBySlash[0].Trim();
-                  //  childRaw = splitBySlash[1].Trim();
-
+                    parentRaw = splitBySlash[0].Trim();
+                    childRaw = splitBySlash[1].Trim();
                 }
                 else
                 {
@@ -166,11 +152,9 @@ namespace Printing_Judge_Notifications
                 // Нет разделителей - считаем всё одним человеком (ребенком)
                 childRaw = fullName;
             }
-            MessageBox.Show(childRaw);
-            тут ввести солидарных должников - через слеш которые отмечены
 
             // --- 3. ОБРАБОТКА СЕГМЕНТОВ (КАЖДЫЙ ОТДЕЛЬНО) ---
-
+            
             // Обработка ребенка
             var (childClean, childSecondSurnameRaw) = ExtractSecondSurnameFromSegment(childRaw);
             var childParts = ParseNameParts(childClean);
@@ -264,53 +248,6 @@ namespace Printing_Judge_Notifications
 
             var orderNumber = data.OrderNumber.ToString();
             string amountSum = data.AmountSum.ToString();
-            
-            int value = _mainWindow.GetSelectedOfficerId();
-            string placement = "";
-            string officer = "";
-            string officer_address = "";
-            string officer_street = "";
-
-            switch (value)
-            {
-                case 0:
-                    placement = "Георгиевского";
-                    officer = "А.Г.Капуста";
-                    officer_address = "357820, Ставропольский край, г. Георгиевск";
-                    officer_street = "ул. Калинина, 10";
-                    break;
-
-                case 1:
-                    placement = "Кировского";
-                    officer = "Т.С.Коробейниковой";
-                    officer_address = "357300, Ставропольский край, г. Новопавловск";
-                    officer_street = "ул. Мира, 190 Б";
-                    break;
-
-                case 2:
-                    placement = "Cоветского";
-                    officer = "А. Г. Ржевскому";
-                    officer_address = "357914, Ставропольский край, г. Зеленокумск";
-                    officer_street = "yл. 50 лет Октября, 51";
-                    break;
-
-                case 3:
-                    placement = "Степновского";
-                    officer = "О. В. Балдовой";
-                    officer_address = "357930, Ставропольский край, с. Степное";
-                    officer_street = "пл. Ленина, 17а";
-                    break;
-
-                case 4:
-                    placement = "Курского";
-                    officer = "А. И. Заргарову";
-                    officer_address = "357850, Ставропольский край, ст. Курская";
-                    officer_street = "пр. Комсомольский, 8";
-                    break;
-
-            }
-            
-
 
             var replacements = new Dictionary<string, string>
             {
@@ -321,17 +258,15 @@ namespace Printing_Judge_Notifications
                 {"{{CHILD_FULLNAME}}", genitiveCaseChildFullName.Trim() ?? ""},
                 {"{{PARENT_FULLNAME}}", !string.IsNullOrEmpty(genitiveCaseParentFullName) ? genitiveCaseParentFullName.Trim() : ""},
                 {"{{ADDRESS}}", fullAddress.Trim()},
-                {"{{PLACEMENT}}", placement.ToString()},
-                {"{{OFFICER}}", officer.ToString()},
-                {"{{OFFICER_ADDRESS}}", officer_address.ToString()},
-                {"{{OFFICER_STREET}}", officer_street.ToString()}
+                {"{{PLACEMENT}}", "" },
+                {"{{OFFICER}}", " "}    ,
+                {"{{OFFICER_ADDRESS}}", ""},
+                {"{{OFFICER_STREET}}", ""}
             };
 
             InitiateDocument(templatePath, outputPath, replacements);
         }
-
-      
-
+        wwww
         private void InitiateDocument(string templatePath, string outputPath, Dictionary<string, string> replacements)
         {
             if (File.Exists(outputPath))

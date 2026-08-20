@@ -1,98 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-
+using System.Globalization;
 
 namespace Printing_Judge_Notifications
 {
     public static class RussianDeclension
     {
-        /// <summary>
-        /// Склонение фамилии (родительный падеж)
-        /// </summary>
-        public static string DeclineSurname(string s)
+        private static bool IsNonDeclinableSuffix(string word)
         {
-            if (string.IsNullOrWhiteSpace(s))
-                return s;
-
-            s = s.Trim();
-            if (s.Length < 2)
-                return s;
-
-            // Если заканчивается на "о" — не склоняем
-            if (s[^1] == 'о')
-                return s;
-
-            string last2 = s[^2..];      // аналог Right(s, 2)
-            string last3 = s[^3..];      // аналог Right(s, 3)
-            string baseStr = s[..^2];    // аналог Left(s, Len(s) - 2)
-
-            // Исключения: не склоняем фамилии на -ук, -ян, -янц, -дзе
-            if (last2 == "ук" || last2 == "ян" || last3 == "янц" || last3 == "дзе")
-                return s;
-
-            switch (last2)
-            {
-                case "ов":
-                case "ев":
-                case "ин":
-                case "ын":
-                    return s + "а";
-
-                case "ый":
-                case "ой":
-                case "ий":
-                    return baseStr + "ого";
-
-                case "ая":
-                    return s[..^2] + "ой";
-
-                case "яя":
-                    return s[..^2] + "ей";
-
-                case "на":
-                    // Если перед "на" стоит "и" или "ы", то "ной", иначе не склоняем
-                    if (baseStr[^1] == 'и' || baseStr[^1] == 'ы')
-                        return baseStr + "ной";
-                    else
-                        return s;
-
-                case "ва":
-                    return baseStr + "вой";
-
-                default:
-                    // Стандартное правило: если оканчивается на согласную (диапазон б-д, ж, з-т, ф-я), добавляем "а"
-                    char lastChar = s[^1];
-                    if (IsRussianConsonant(lastChar))
-                        return s + "а";
-
-                    return s;
-            }
-
-            // Коррекция для слова "хорошего" (чтобы не получилось "хорошого")
-            string result = DeclineSurnameInternal(s); // вызов логики выше через рекурсию/переменную невозможен, поэтому логика выше уже финальная
-                                                       // Но в VBA была пост-коррекция. В C# сделаем её явно после switch:
-                                                       // Перепишем чуть иначе, чтобы поймать результат и поправить:
+            if (string.IsNullOrWhiteSpace(word)) return false;
+            string lower = word.ToLower(CultureInfo.InvariantCulture);
+            return lower == "оглы" || lower == "кызы";
         }
 
-        // Переопределим метод, чтобы корректно обработать финальную коррекцию (как в VBA)
-        public static string DeclineSurnameFinal(string s)
+        public static string DeclineSurname(string surname)
         {
-            if (string.IsNullOrWhiteSpace(s))
-                return s;
+            if (string.IsNullOrWhiteSpace(surname)) return surname;
+            surname = surname.Trim();
+            if (surname.Length < 2) return surname;
 
-            s = s.Trim();
-            if (s.Length < 2)
-                return s;
+            if (IsNonDeclinableSuffix(surname))
+                return surname;
 
-            if (s[^1] == 'о')
-                return s;
+            char lastChar = surname[^1];
+            string last2 = surname[^2..];
+            string baseStr = surname[..^2];
 
-            string last2 = s[^2..];
-            string last3 = s[^3..];
-            string baseStr = s[..^2];
-
-            if (last2 == "ук" || last2 == "ян" || last3 == "янц" || last3 == "дзе")
-                return s;
+            // Исключения: несклоняемые окончания
+            if (last2 == "ук" || last2 == "ян" || surname[^3..] == "янц" || surname[^3..] == "дзе")
+                return surname;
 
             string result;
 
@@ -102,68 +37,55 @@ namespace Printing_Judge_Notifications
                 case "ев":
                 case "ин":
                 case "ын":
-                    result = s + "а";
+                    result = surname + "а";
                     break;
-
                 case "ый":
                 case "ой":
                 case "ий":
                     result = baseStr + "ого";
                     break;
-
                 case "ая":
-                    result = s[..^2] + "ой";
+                    result = surname[..^2] + "ой";
                     break;
-
                 case "яя":
-                    result = s[..^2] + "ей";
+                    result = surname[..^2] + "ей";
                     break;
-
                 case "на":
-                    if (baseStr[^1] == 'и' || baseStr[^1] == 'ы')
+                    char beforeNa = baseStr[^1];
+                    if (beforeNa == 'и' || beforeNa == 'ы')
                         result = baseStr + "ной";
                     else
-                        result = s;
+                        result = surname;
                     break;
-
                 case "ва":
                     result = baseStr + "вой";
                     break;
-
                 default:
-                    if (IsRussianConsonant(s[^1]))
-                        result = s + "а";
-                    else
-                        result = s;
+                    result = IsRussianConsonant(lastChar) ? surname + "а" : surname;
                     break;
             }
 
-            // Финальная коррекция (из VBA): если получилось "хорошого", исправляем на "хорошего"
             if (result.ToLower() == "хорошого")
-                return "хорошего";
+                result = "хорошего";
 
-            return result;
+            return CapitalizeFirst(result);
         }
 
-        /// <summary>
-        /// Склонение имени (родительный падеж)
-        /// </summary>
-        public static string DeclineName(string s)
+        public static string DeclineName(string name)
         {
-            if (string.IsNullOrWhiteSpace(s))
-                return s;
+            if (string.IsNullOrWhiteSpace(name)) return name;
+            name = name.Trim();
 
-            s = s.Trim();
+            if (name.Contains("вич", StringComparison.OrdinalIgnoreCase) ||
+                name.Contains("вна", StringComparison.OrdinalIgnoreCase))
+            {
+                return DeclinePatronymic(name);
+            }
 
-            // Проверка: если содержит "вич" или "вна" — это отчество, передаем в DeclinePatronymic
-            if (s.Contains("вич") || s.Contains("вна"))
-                return DeclinePatronymic(s);
+            if (name.Length == 0) return name;
 
-            if (s.Length == 0)
-                return s;
-
-            char last1 = s[^1];
-            string baseStr = s[..^1];
+            char last1 = name[^1];
+            string baseStr = name[..^1];
             string result;
 
             switch (last1)
@@ -172,32 +94,15 @@ namespace Printing_Judge_Notifications
                 case 'ь':
                     result = baseStr + "я";
                     break;
-
                 case 'а':
-                    if (!string.IsNullOrEmpty(baseStr) && baseStr[^1] != 'и')
-                        result = baseStr + "ы";
-                    else
-                        result = baseStr + "и";
+                    result = (!string.IsNullOrEmpty(baseStr) && baseStr[^1] != 'и') ? baseStr + "ы" : baseStr + "и";
                     break;
-
                 case 'я':
                     result = baseStr + "и";
                     break;
-
-                case 'е':
-                case 'о':
-                case 'у':
-                case 'ы':
-                case 'э':
-                case 'ю':
-                    // Не склоняем
-                    result = s;
-                    break;
-
                 default:
-                    // Проверка особых имен
-                    string lower = s.ToLower();
-                    switch (lower)
+                    string lowerName = name.ToLower();
+                    switch (lowerName)
                     {
                         case "лев":
                         case "сергей":
@@ -210,170 +115,93 @@ namespace Printing_Judge_Notifications
                             result = baseStr + "я";
                             break;
                         default:
-                            result = s + "а"; // Стандартное склонение
+                            result = IsRussianConsonant(last1) ? name + "а" : name;
                             break;
                     }
                     break;
             }
 
-            // Коррекция двойного "аа" на конце (например, "Иванаа" -> "Ивана")
             if (result.Length >= 2 && result[^2..] == "аа")
                 result = result[..^1];
 
-            // Особые случаи (список можно расширять)
             string lowerResult = result.ToLower();
-            switch (lowerResult)
+            result = lowerResult switch
             {
-                case "иванаа": return "Ивана";
-                case "петраа": return "Петра";
-                case "владимираа": return "Владимира";
-                case "михаилаа": return "Михаила";
-                case "никитаа": return "Никиты";
-                case "сашаа": return "Саши";
-                case "дашаа": return "Даши";
-                case "машаа": return "Маши";
-                case "ольгы": return "Ольги";
-                case "аристархы": return "Аристарха";
-                case "вероникы": return "Вероники";
-                default: return result;
-            }
+                "иванаа" => "Ивана",
+                "петраа" => "Петра",
+                "владимираа" => "Владимира",
+                "михаилаа" => "Михаила",
+                "никитаа" => "Никиты",
+                "сашаа" => "Саши",
+                "дашаа" => "Даши",
+                "машаа" => "Маши",
+                "ольгы" => "Ольги",
+                "лея" => "Льва",
+                "олея" => "Олега",
+                _ => result
+            };
+
+            return CapitalizeFirst(result);
         }
 
         /// <summary>
-        /// Склонение отчества (родительный падеж)
+        /// Сюда должна попадать ТОЛЬКО основа отчества БЕЗ «оглы»/«кызы».
         /// </summary>
-        public static string DeclinePatronymic(string s)
+        public static string DeclinePatronymic(string patronymic)
         {
-            if (string.IsNullOrWhiteSpace(s))
-                return s;
+            if (string.IsNullOrWhiteSpace(patronymic)) return patronymic;
+            patronymic = patronymic.Trim();
 
-            s = s.Trim();
+            if (IsNonDeclinableSuffix(patronymic))
+                return patronymic;
 
-            // Исключение: если заканчивается на "вну" — не меняем
-            if (s.EndsWith("вну"))
-                return s;
+            if (patronymic.Length < 2) return patronymic;
 
-            if (s.Length < 2)
-                return s;
+            string p = patronymic.ToLower();
 
-            string last2 = s[^2..];
-            string last3 = s[^3..];
-            string baseStr = s[..^2]; // Основа без последних 2 символов
+            if (p.EndsWith("ович"))
+                return CapitalizeFirst(patronymic[..^4] + "овича");
+            if (p.EndsWith("евич"))
+                return CapitalizeFirst(patronymic[..^4] + "евича");
+            if (p.EndsWith("овна"))
+                return CapitalizeFirst(patronymic[..^4] + "овны");
+            if (p.EndsWith("евна"))
+                return CapitalizeFirst(patronymic[..^4] + "евны");
+            if (p.EndsWith("ична"))
+                return CapitalizeFirst(patronymic[..^4] + "ичны");
 
-            // Мужские отчества: -ович -> -овича, -евич -> -евича
-            if (last3 == "ович" || last3 == "евич")
-                return s + "а";
-
-            // Женские отчества: -овна -> -овны, -евна -> -евны, -ична -> -ичны
-            if (last3 == "овна" || last3 == "евна" || last3 == "ична")
-                return baseStr + "ны";
-
-            // Резервная логика
-            switch (last2)
-            {
-                case "на": // Общее правило для женских отчеств
-                    return baseStr + "ны";
-                default:
-                    return s + "а"; // Стандартное добавление "а"
-            }
-
-            // Примечание: финальная коррекция "аа" и особые случаи из VBA уже покрыты общей логикой выше,
-            // но если нужно строго повторить VBA, можно добавить проверку после switch.
-            // В данном случае логика switch покрывает основные пути, поэтому отдельный блок коррекции не требуется,
-            // кроме случая, когда результат мог бы получиться с двойным "аа".
-
-            // Для полной совместимости с VBA добавим пост-обработку:
-            string finalResult = DeclinePatronymicInternal(s);
-            // Так как мы не можем вызвать сам себя внутри switch, перепишем метод без рекурсии:
+            return patronymic; // Если не распознано — не ломаем
         }
 
-        // Финальная версия DeclinePatronymic с пост-обработкой
-        public static string DeclinePatronymicFinal(string s)
+        public static string GetLivingAt(string patronymicWithSuffix)
         {
-            if (string.IsNullOrWhiteSpace(s))
-                return s;
+            if (string.IsNullOrWhiteSpace(patronymicWithSuffix))
+                return "проживающего по адресу: ";
 
-            s = s.Trim();
+            string p = patronymicWithSuffix.ToLower().Trim();
 
-            if (s.EndsWith("вну"))
-                return s;
+            if (p.Contains("кызы"))
+                return "проживающей по адресу: ";
+            if (p.Contains("оглы"))
+                return "проживающего по адресу: ";
 
-            if (s.Length < 2)
-                return s;
+            if (p.EndsWith("вна") || p.EndsWith("ична") || p.EndsWith("евна"))
+                return "проживающей по адресу: ";
 
-            string last2 = s[^2..];
-            string last3 = s[^3..];
-            string baseStr = s[..^2];
-            string result;
-
-            if (last3 == "ович" || last3 == "евич")
-            {
-                result = s + "а";
-            }
-            else if (last3 == "овна" || last3 == "евна" || last3 == "ична")
-            {
-                result = baseStr + "ны";
-            }
-            else
-            {
-                switch (last2)
-                {
-                    case "на":
-                        result = baseStr + "ны";
-                        break;
-                    default:
-                        result = s + "а";
-                        break;
-                }
-            }
-
-            // Коррекция двойного "аа"
-            if (result.Length >= 2 && result[^2..] == "аа")
-                result = result[..^1];
-
-            // Особые случаи
-            string lowerS = s.ToLower();
-            switch (lowerS)
-            {
-                case "светлановна": return "Светлановны";
-                case "викторовна": return "Викторовны";
-                case "геннадьевна": return "Геннадиевны"; // В VBA было "Геннадьевны", но в родительном падеже правильно "Геннадиевны". Оставим как в оригинале VBA: "Геннадьевны"
-                                                          // Исправление: в VBA написано "Геннадьевны". Вернем точно как в VBA.
-                case "юрьевна": return "Юрьевны";
-                case "арсеньевна": return "Арсеньевны";
-                default:
-                    // Для остальных случаев возвращаем результат с коррекцией "аа", но без жесткой привязки к списку выше
-                    // Однако, если результат совпал с одним из исключений, нужно вернуть правильное значение.
-                    // Проще: проверить lowerResult против списка исключений.
-                    break;
-            }
-
-            // Дополнительная проверка результата против списка исключений (на случай, если логика выше не сработала)
-            string lowerResult = result.ToLower();
-            switch (lowerResult)
-            {
-                case "светлановнаа": return "Светлановны"; // Пример, если сработал общий алгоритм
-                                                           // Но лучше: если исходное слово было из списка, вернуть жестко заданное значение.
-                                                           // Поэтому вернём результат, но с учётом того, что для конкретных слов мы уже сделали return выше.
-                default: return result;
-            }
-
-            return result; // Этот возврат недостижим из-за return внутри switch, но компилятор требует
+            return "проживающего по адресу: ";
         }
 
-        // Упрощенная и чистая финальная версия без дублирования логики
-        public static string GetDeclinedSurname(string surname) => DeclineSurnameFinal(surname);
-        public static string GetDeclinedName(string name) => DeclineName(name);
-        public static string GetDeclinedPatronymic(string patronymic) => DeclinePatronymicFinal(patronymic);
+        private static string CapitalizeFirst(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return input;
+            if (input.Length == 1) return char.ToUpper(input[0]).ToString();
+            return char.ToUpper(input[0]) + input[1..].ToLower();
+        }
 
         private static bool IsRussianConsonant(char c)
         {
-            // Диапазон букв: б-д, ж, з-т, ф-я
-            // Это упрощенная проверка, соответствующая VBA Like "[б-джд-тф-я]"
-            return c is >= 'б' and <= 'д' or
-                   c == 'ж' or
-                   (c >= 'з' && c <= 'т') or
-                   (c >= 'ф' && c <= 'я');
+            char lower = char.ToLower(c);
+            return !"аеёиоуыэюя".Contains(lower);
         }
     }
 }
