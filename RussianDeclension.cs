@@ -24,7 +24,7 @@ namespace Printing_Judge_Notifications
             char lastChar = surname[^1];
             string last2 = surname[^2..];
             string baseStr = surname[..^2];
-
+            sssss
             // Исключения: несклоняемые окончания
             if (last2 == "ук" || last2 == "ян" || surname[^3..] == "янц" || surname[^3..] == "дзе")
                 return surname;
