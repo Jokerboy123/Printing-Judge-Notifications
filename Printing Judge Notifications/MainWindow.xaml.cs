@@ -259,7 +259,7 @@ namespace Printing_Judge_Notifications
             }
 
             var data = selectedItems.First();
-            // MessageBox.Show(data.FullName);
+
             string baseDir = @"C:\Users\Ларина\source\repos\Printing Judge Notifications — копия\Printing Judge Notifications";
             string templatePath = "";
             // если в строке есть "за", то выбирать первый шаблон, иначе выбирать второй шаблон
@@ -268,7 +268,7 @@ namespace Printing_Judge_Notifications
                 templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_INITIATION_CHILD.docx");
             }
             else
-            {
+            {tttt
                 templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_INITIATION_ADULT.docx");
             }
             string outputDir = Path.Combine(baseDir, "Output");
@@ -276,7 +276,7 @@ namespace Printing_Judge_Notifications
             if (!File.Exists(templatePath))
             {
                 MessageBox.Show($"Шаблон не найден в папке {templatePath}");
-                return;
+                return; 
             }
             try
             {
