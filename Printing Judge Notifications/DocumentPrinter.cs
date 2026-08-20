@@ -266,7 +266,6 @@ namespace Printing_Judge_Notifications
 
             InitiateDocument(templatePath, outputPath, replacements);
         }
-        fgertgye5r
         private void InitiateDocument(string templatePath, string outputPath, Dictionary<string, string> replacements)
         {
             if (File.Exists(outputPath))
