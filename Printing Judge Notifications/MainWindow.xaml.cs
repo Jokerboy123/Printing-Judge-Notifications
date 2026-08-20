@@ -11,9 +11,10 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
-fffff
+
 namespace Printing_Judge_Notifications
 {
+    eeee
     public partial class MainWindow : Window
     {
         private ObservableCollection<OwnerData> _rows = new();
@@ -268,7 +269,7 @@ namespace Printing_Judge_Notifications
                 templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_INITIATION_CHILD.docx");
             }
             else
-            {tttt
+            {
                 templatePath = Path.Combine(baseDir, "templates", "TEMPLATE_INITIATION_ADULT.docx");
             }
             string outputDir = Path.Combine(baseDir, "Output");
