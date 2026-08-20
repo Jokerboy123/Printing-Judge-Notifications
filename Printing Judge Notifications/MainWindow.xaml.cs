@@ -14,7 +14,7 @@ using System.Windows;
 
 namespace Printing_Judge_Notifications
 {
-    eeee
+    
     public partial class MainWindow : Window
     {
         private ObservableCollection<OwnerData> _rows = new();
