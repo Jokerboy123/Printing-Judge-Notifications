@@ -43,7 +43,8 @@
         <Style x:Key="SecondaryButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="White"/>
             <Setter Property="Foreground" Value="#374151"/>
-            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="12,8"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="#D1D5DB"/>
@@ -60,11 +61,89 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#F9FAFB"/>
-                                <Setter Property="BorderBrush" Value="#9CA3AF"/>
+                                <Setter Property="Background" Value="#138808"/>
+                                <Setter Property="BorderBrush" Value="#138808"/>
+                                <Setter Property="Foreground" Value="White"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Background" Value="#E5E7EB"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="radioButtonStyle" TargetType="RadioButton">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0, 4, 4, 0"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Height" Value="40"/>
+
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#138808"/>
+
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontSize" Value="16"/>
+            <!-- Чуть уменьшил, чтобы было аккуратнее, можно вернуть 20 -->
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <!-- Рамка вокруг всей карточки -->
+                        <Border Background="{TemplateBinding Background}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        CornerRadius="6" 
+                        Padding="{TemplateBinding Padding}">
+
+                            <BulletDecorator Background="Transparent">
+                                <!-- Кружок (Bullet) -->
+                                <BulletDecorator.Bullet>
+                                    <Grid Width="20" Height="20">
+                                        <Ellipse x:Name="OuterCircle" 
+                                         Stroke="#D1D5DB" 
+                                         StrokeThickness="2"
+                                         Width="16"
+                                         Height="16"
+
+                                        Fill="White"/>
+                                        <Ellipse x:Name="InnerCircle" 
+                                                 Width="15"
+                                                 Height="15"
+                                         Fill="#138808" 
+                                         Visibility="Collapsed" 
+                                        
+                                                 />
+                                    </Grid>
+                                </BulletDecorator.Bullet>
+
+                                <!-- Текст -->
+                                <ContentPresenter HorizontalAlignment="Left" 
+                                          VerticalAlignment="Center" 
+                                          Margin="8,0,0,0"/>
+                            </BulletDecorator>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Наведение -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="#138808"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Background" Value="#138808"/>
+                                <Setter TargetName="OuterCircle" Property="Stroke" Value="#9CA3AF"/>
+                            </Trigger>
+
+                            <!-- Выбор (IsChecked) -->
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="InnerCircle" Property="Visibility" Value="Visible"/>
+                                <Setter Property="Background" Value="#E0E7FF"/>
+                                <Setter Property="BorderBrush" Value="#138808"/>
+                                <Setter Property="Foreground" Value="#138808"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -128,12 +207,12 @@
 
                 <!-- БЛОК 1: Возбуждение ИП (Печать) (Колонка 2) -->
                 <!-- БЛОК 1: Возбуждение ИП (Печать + PDF) -->
-                <Border Grid.Column="2" 
+                <Border Grid.Column="1" 
         Background="WhiteSmoke" 
         BorderBrush="#E5E7EB" 
         BorderThickness="1" 
         CornerRadius="8" 
-        Padding="15">
+        Padding="15" Grid.ColumnSpan="2" Margin="10,0,10,0">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -151,27 +230,32 @@
                    Margin="0,0,0,12"
                    Grid.Row="0"/>
 
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="5"/>
+                        <Grid Grid.Row="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="5"/>
                                 <!-- Небольшой отступ между кнопками -->
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
                             <Button Content="Печать"
+                                                                        x:Name ="print_v_btn"
+
                     Click="InitiationIP_PrintOut_Click"
+                                    BorderBrush="#138808"
                     Style="{StaticResource SecondaryButtonStyle}"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Grid.Column="0"/>
+                    Grid.Row="0"/>
 
-                            <Button Content="PDF"
+                            <Button Content="Создать word"
                     Click="InitiationIP_PDF_Click"
                     Style="{StaticResource SecondaryButtonStyle}"
+                                                                        BorderBrush="#138808"
+
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Grid.Column="2"/>
+                    Grid.Row="2"/>
                         </Grid>
                     </Grid>
                 </Border>
@@ -183,7 +267,7 @@
                     BorderBrush="#E5E7EB" 
                     BorderThickness="1" 
                     CornerRadius="8" 
-                    Padding="15" Grid.ColumnSpan="3" Margin="9,0,10,0">
+                    Padding="15" Grid.ColumnSpan="2" Margin="0,0,10,0">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -201,75 +285,74 @@
                             Margin="0,0,0,12"
                             Grid.Row="0"/>
 
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="5"/>
-                                <!-- Небольшой отступ между кнопками -->
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <Button Content="Печать"
-Click="CancelIP_PrintOut_Click"
-Style="{StaticResource SecondaryButtonStyle}"
-HorizontalAlignment="Stretch"
-VerticalAlignment="Stretch"
-Grid.Column="0"/>
-
-                            <Button Content="PDF"
-Click="CancelIP_PDF_Click"
-Style="{StaticResource SecondaryButtonStyle}"
-HorizontalAlignment="Stretch"
-VerticalAlignment="Stretch"
-Grid.Column="2"/>
-                        </Grid>
-                    </Grid>
-                </Border>
-                <Border Grid.Column="6" 
-                    Background="White" 
-                    BorderBrush="#E5E7EB" 
-                    BorderThickness="1" 
-                    CornerRadius="8" 
-                    Padding="15" Margin="0,0,-1,0">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <!-- Кнопки -->
-                            <!-- Заголовок -->
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-
-                        <TextBlock Text="Выбор отделения" 
-                            FontWeight="Bold" 
-                            FontSize="13" 
-                            Foreground="#4B5563" 
-                            TextWrapping="Wrap"
-                            TextAlignment="Center"
-                            Margin="0,0,0,12"
-                            Grid.Row="0"/>
-
-                        <Grid Grid.Row="1">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="10"/>
-                                <!-- Небольшой отступ между кнопками -->
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                        <Grid Grid.Row="3">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"/>
                                 <RowDefinition Height="5"/>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="5"/>
+                                <!-- Небольшой отступ между кнопками -->
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <RadioButton GroupName="townChecked" x:Name="KURSK" Grid.Column="0" Grid.Row="0" Tag="1" Content="Курское" ></RadioButton>
-                            <RadioButton GroupName="townChecked" x:Name="STEPN" Grid.Column="0" Grid.Row="2" Tag="2" Content="Степновское" ></RadioButton>
-                            <RadioButton GroupName="townChecked" x:Name="SOVET" Grid.Column="0" Grid.Row="4" Tag="3"  Content="Советское" ></RadioButton>
-                            <RadioButton GroupName="townChecked" x:Name="GEO" Grid.Column="2" Grid.Row="0" Tag="4" Content="Георгиевск" ></RadioButton>
-                            <RadioButton GroupName="townChecked" x:Name="NOVOP" Grid.Column="2" Grid.Row="2" Tag="5" Content="Кировское" ></RadioButton>
+                            <Button Content="Печать"
+                                    x:Name ="print_p_btn"
+Click="CancelIP_PrintOut_Click"
+                                                                        BorderBrush="#138808"
 
+Style="{StaticResource SecondaryButtonStyle}"
+HorizontalAlignment="Stretch"
+VerticalAlignment="Stretch"
+                                    
+Grid.Row="0"/>
+
+                            <Button Content="Создать word"
+                    Click="CancelIP_PDF_Click"
+                    Style="{StaticResource SecondaryButtonStyle}"
+                                                                        BorderBrush="#138808"
+
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Grid.Row="2"/>
                         </Grid>
+                    </Grid>
+                </Border>
+                <!-- Блок "Выбор отделения" -->
+                <Border Grid.Column="5" 
+                    Background="WhiteSmoke"
+        BorderBrush="#E5E7EB" 
+        BorderThickness="1" 
+        CornerRadius="8" 
+        Padding="5" 
+        Margin="0,0,1,0" 
+        Grid.ColumnSpan="2">
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Заголовок -->
+                        <TextBlock Text="Выбор района" 
+    FontWeight="Bold" 
+    FontSize="13" 
+    Foreground="#4B5563" 
+    TextWrapping="Wrap"
+    TextAlignment="Center"
+    Margin="0,10,0,9"
+    Grid.Row="0"/>
+                        <!-- WrapPanel сам расставит карточки в ряд и перенесет на новую строку -->
+                        <WrapPanel Grid.Row="1" 
+                   Orientation="Horizontal" 
+                   HorizontalAlignment="Center" 
+                   ItemWidth="Auto">
+
+                            <RadioButton GroupName="townChecked" x:Name="KURSK" Tag="1" Content="Курское" Style="{StaticResource radioButtonStyle}"/>
+                            <RadioButton GroupName="townChecked" x:Name="GEO" Tag="4" Content="Георгиевск" Style="{StaticResource radioButtonStyle}"/>
+                            <RadioButton GroupName="townChecked" x:Name="SOVET" Tag="3" Content="Советское" Style="{StaticResource radioButtonStyle}"/>
+                            <RadioButton GroupName="townChecked" x:Name="STEPN" Tag="2" Content="Степновское" Style="{StaticResource radioButtonStyle}"/>
+                            <RadioButton GroupName="townChecked" x:Name="NOVOP" Tag="5" Content="Кировское" Style="{StaticResource radioButtonStyle}"/>
+                            <RadioButton GroupName="townChecked" x:Name="MANUAL" Tag="6" Content="Ручной ввод" Style="{StaticResource radioButtonStyle}" />
+                        </WrapPanel>
                     </Grid>
                 </Border>
 

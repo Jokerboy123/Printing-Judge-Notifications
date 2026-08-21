@@ -247,11 +247,35 @@ namespace Printing_Judge_Notifications
             // Префикс «проживающего/проживающей»
             string childFullNameForGenderCheck = (childPatronymicBase + " " + childSuffix).Trim();
             string livingAtString = RussianDeclension.GetLivingAt(childFullNameForGenderCheck);
-
             var orderNumber = data.OrderNumber.ToString();
+
+            string c_documentType = "";
+
+            if (orderNumber.Contains("ВС") || orderNumber.Contains("BC"))
+            {
+                c_documentType = "исполнительному листу №";
+            }
+            else
+            {
+                c_documentType = "судебному приказу №";
+            }
+
+            string i_documentType = "";
+
+            if (orderNumber.Contains("ВС") || orderNumber.Contains("BC"))
+            {
+                i_documentType = "исполнительного листа №";
+            }
+            else
+            {
+                i_documentType = "судебного приказа №";
+            }
+
+
             string amountSum = data.AmountSum.ToString();
 
             string placement = "";
+            string subjectRF = "";
             string officer = "";
             string officer_address = "";
             string officer_street = "";
@@ -260,33 +284,46 @@ namespace Printing_Judge_Notifications
             {
                 case 1:
                     placement = "Курского";
+                    subjectRF = "Cтавропольскому краю";
                     officer = "А. И. Заргарову";
                     officer_address = "357850, Ставропольский край, ст. Курская";
                     officer_street = "пр. Комсомольский, 8";
                     break;
                 case 2:
                     placement = "Степновского";
+                    subjectRF = "Cтавропольскому краю";
                     officer = "О. В. Балдовой";
                     officer_address = "357930, Ставропольский край, с. Степное";
                     officer_street = "пл. Ленина, 17а";
                     break;
                 case 3:
                     placement = "Советского";
+                    subjectRF = "Cтавропольскому краю";
                     officer = "А. Г. Ржевскому";
                     officer_address = "357914, Ставропольский край, г. Зеленокумск";
                     officer_street = "ул. 50 лет Октября, 51";
                     break;
                 case 4:
                     placement = "Георгиевского";
+                    subjectRF = "Cтавропольскому краю";
                     officer = "А. П. Капуста";
                     officer_address = "357820, Ставропольский край, г. Георгиевск";
                     officer_street = "ул. Калинина, 10";
                     break;
                 case 5:
                     placement = "Кировского";
+                    subjectRF = "Cтавропольскому краю";
                     officer = "Т. С. Коробейниковой";
                     officer_address = "357300, Ставропольский край, г. Новопавловск";
                     officer_street = "ул. Мира, 190 Б";
+                    break;
+                case 6:
+                    placement = "{{ВВЕДИТЕ РАЙОН}}";
+                    officer = "{{ВВЕДИТЕ ПРИСТАВА}}";
+                    officer_address = "{{ВВЕДИТЕ АДРЕС СУДЕБНОГО ОТДЕЛЕНИЯ}}";
+                    officer_street = "{{ВВЕДИТЕ УЛИЦУ СУДЕБНОГО ОТДЕЛЕНИЯ}}";
+                    subjectRF = "{{ВВЕДИТЕ СУБЪЕКТ РФ}}";
+                    
                     break;
                 default:
                     break;
@@ -295,7 +332,10 @@ namespace Printing_Judge_Notifications
             var replacements = new Dictionary<string, string>
             {
                 {"{{TODAYDATE}}", DateTime.Now.Date.ToString("dd.MM.yyyy")},
+                {"{{SUBJECT_RF}}", subjectRF.ToString()},
                 {"{{AMOUNTSUM}}", amountSum.Trim() ?? ""},
+                {"{{c_DOCUMENTTYPE}}", c_documentType.Trim() ?? ""},
+                {"{{i_DOCUMENTTYPE}}", i_documentType.Trim() ?? "" },
                 {"{{LIVINGAT}}", livingAtString.Trim() ?? ""},
                 {"{{ORDERNUMBER}}", orderNumber.Trim() ?? ""},
                 {"{{CHILD_FULLNAME}}", genitiveCaseChildFullName.Trim() ?? ""},

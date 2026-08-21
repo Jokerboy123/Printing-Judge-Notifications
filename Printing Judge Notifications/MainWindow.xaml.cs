@@ -2,6 +2,7 @@
 using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -140,16 +141,7 @@ namespace Printing_Judge_Notifications
                             // Пропускаем проблемные строки
                         }
 
-                        processed++;
-
-                        // Обновляем прогресс каждые 50 строк ИЛИ в конце
-                        if (processed % 50 == 0 || processed == totalRows)
-                        {
-                            int percent = (processed * 80) / totalRows; // 80% — это максимум на этапе чтения
-                            percent = Math.Min(80, percent);           // не больше 80
-
-                            Application.Current.Dispatcher.Invoke(() => UpdateProgress(percent));
-                        }
+                       
                     }
 
                     return tempList;
@@ -160,7 +152,7 @@ namespace Printing_Judge_Notifications
                 {
                     _rows.Add(item);
                 }
-                UpdateProgress(90);
+                UpdateProgress(80);
 
                 // ЭТАП 3: финальная привязка и завершение (10%)
                 dataGrid.ItemsSource = _rows;
@@ -251,8 +243,36 @@ namespace Printing_Judge_Notifications
         }
         private int GetCheckedTownNumber()
         {
-            var buttons = new[] { KURSK, GEO, SOVET, STEPN, NOVOP };
+            var buttons = new[] { KURSK, GEO, SOVET, STEPN, NOVOP, MANUAL };
             var selected = buttons.FirstOrDefault(rb => rb.IsChecked == true);
+
+            // Определяем, разрешена ли печать
+            bool canPrint = selected != null && selected != MANUAL;
+
+            // Применяем состояние ко всем кнопкам
+            print_p_btn.IsEnabled = canPrint;
+            print_v_btn.IsEnabled = canPrint;
+
+            // Показываем сообщение только если печать запрещена И была выбрана конкретная кнопка
+            if (selected == MANUAL || canPrint==false)
+            {
+                MessageBox.Show(
+                    "Перед печатью создайте документ WORD заполните поля об отделении судебных приставов вручную в созданном документе!",
+                    "Требуется ручное заполнение",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+
+                );
+
+                print_p_btn.IsEnabled = true;
+                print_v_btn.IsEnabled = true;
+
+                return 0;
+                
+
+            }
+
+            
 
             if (selected == null)
             {
@@ -368,12 +388,13 @@ namespace Printing_Judge_Notifications
                     string outputPath = Path.Combine(outputDir, fileName);
 
                     printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
+                    Thread.Sleep(500);
 
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = outputPath,
                         UseShellExecute = true,
-                        Verb = "Print",
+                        Verb = "print",
 
                     });
                 }
@@ -454,6 +475,9 @@ namespace Printing_Judge_Notifications
         private void CancelIP_PrintOut_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = dataGrid.SelectedItems.Cast<OwnerData>().ToList();
+
+            
+
             if (!selectedItems.Any())
             {
                 MessageBox.Show("Выберите хотя бы одну строку в таблице!");
@@ -497,12 +521,13 @@ namespace Printing_Judge_Notifications
                     string outputPath = Path.Combine(outputDir, fileName);
 
                     printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
+                    Thread.Sleep(500);
 
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = outputPath,
                         UseShellExecute = true,
-                        Verb = "Print",
+                        Verb = "print",
 
                     });
                 }
