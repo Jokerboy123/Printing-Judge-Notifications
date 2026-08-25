@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Windows;
 
 namespace Printing_Judge_Notifications
 {
@@ -172,26 +173,63 @@ namespace Printing_Judge_Notifications
 
             return patronymic; // Если не распознано — не ломаем
         }
+		/// <summary>
+		/// Возвращает true, если владелец точно женский (по суффиксам/отчеству),
+		/// false — если точно мужской, null — если неясно.
+		/// </summary>
+		public static bool? IsFemale(string patronymicWithSuffix)
+		{
+			if (string.IsNullOrWhiteSpace(patronymicWithSuffix))
+				return null;
 
-        public static string GetLivingAt(string patronymicWithSuffix)
-        {
-            if (string.IsNullOrWhiteSpace(patronymicWithSuffix))
-                return "проживающего по адресу: ";
+			string p = patronymicWithSuffix.ToLower().Trim();
 
-            string p = patronymicWithSuffix.ToLower().Trim();
+			if (p.Contains("кызы")) return true;
+			if (p.Contains("оглы")) return false;
 
-            if (p.Contains("кызы"))
-                return "проживающей по адресу: ";
-            if (p.Contains("оглы"))
-                return "проживающего по адресу: ";
+			if (p.EndsWith("вна") || p.EndsWith("ична") || p.EndsWith("евна")) return true;
+			if (p.EndsWith("вич") || p.EndsWith("ич")) return false;
 
-            if (p.EndsWith("вна") || p.EndsWith("ична") || p.EndsWith("евна"))
-                return "проживающей по адресу: ";
+			return null; // неясно
+		}
 
-            return "проживающего по адресу: ";
-        }
+		public static string GetLivingAt(string patronymicWithSuffix, int ownerCount)
+		{
+			// Если владельцев больше 1, нам нужно смотреть на всех, а не только на последнего.
+			// Но здесь у нас только одна строка (последнего владельца).
+			// Значит, эту логику надо перенести туда, где у нас есть весь список segments.
+			// Поэтому для случая ownerCount > 1 этот метод лучше вообще не использовать.
+			// Ниже — универсальная реализация, которая работает корректно и для 1 владельца.
 
-        private static string CapitalizeFirst(string input)
+			if (ownerCount == 0)
+				return "проживающих по адресу: ";
+
+			if (string.IsNullOrWhiteSpace(patronymicWithSuffix))
+			{
+				// Если нет данных для определения пола — безопаснее множественное
+				return ownerCount > 1 ? "проживающих по адресу: " : "проживающего по адресу: ";
+			}
+
+			string p = patronymicWithSuffix.ToLower().Trim();
+
+			// Сначала проверяем суффиксы «кызы/оглы» — они однозначны
+			if (p.Contains("кызы"))
+				return "проживающей по адресу: ";
+			if (p.Contains("оглы"))
+				return "проживающего по адресу: ";
+
+			// Потом окончания отчеств — тоже однозначны
+			if (p.EndsWith("вна") || p.EndsWith("ична") || p.EndsWith("евна"))
+				return "проживающей по адресу: ";
+			if (p.EndsWith("вич") || p.EndsWith("ич"))
+				return "проживающего по адресу: ";
+
+			// Если ничего не подошло — возвращаем по количеству
+			// Это покрывает случаи, когда отчества нет, или оно нестандартное
+			return ownerCount > 1 ? "проживающих по адресу: " : "проживающего по адресу: ";
+		}
+
+		private static string CapitalizeFirst(string input)
         {
             if (string.IsNullOrEmpty(input)) return input;
             if (input.Length == 1) return char.ToUpper(input[0]).ToString();
