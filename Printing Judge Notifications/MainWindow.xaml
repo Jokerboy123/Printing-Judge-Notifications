@@ -150,16 +150,96 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="newradioButtonStyle" TargetType="RadioButton">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Margin" Value="0, 4, 4, 0"/>
+            <Setter Property="Height" Value="40"/>
+
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="#138808"/>
+
+            <Setter Property="Foreground" Value="#374151"/>
+            <Setter Property="FontSize" Value="16"/>
+            <!-- Чуть уменьшил, чтобы было аккуратнее, можно вернуть 20 -->
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <!-- Рамка вокруг всей карточки -->
+                        <Border Background="{TemplateBinding Background}" 
+                        BorderBrush="{TemplateBinding BorderBrush}" 
+                        BorderThickness="{TemplateBinding BorderThickness}" 
+                        CornerRadius="6" 
+                        Padding="{TemplateBinding Padding}">
+
+                            <BulletDecorator Background="Transparent">
+                                <!-- Кружок (Bullet) -->
+                                <BulletDecorator.Bullet>
+                                    <Grid Width="20" Height="20">
+                                        <Ellipse x:Name="OuterCircle" 
+                                         Stroke="#D1D5DB" 
+                                         StrokeThickness="2"
+                                         Width="16"
+                                         Height="16"
+
+                                        Fill="White"/>
+                                        <Ellipse x:Name="InnerCircle" 
+                                                 Width="15"
+                                                 Height="15"
+                                         Fill="#138808" 
+                                         Visibility="Collapsed" 
+                                        
+                                                 />
+                                    </Grid>
+                                </BulletDecorator.Bullet>
+
+                                <!-- Текст -->
+                                <ContentPresenter HorizontalAlignment="Left" 
+                                          VerticalAlignment="Center" 
+                                          Margin="8,0,0,0"/>
+                            </BulletDecorator>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <!-- Наведение -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" Value="#138808"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="Background" Value="#138808"/>
+                                <Setter TargetName="OuterCircle" Property="Stroke" Value="#9CA3AF"/>
+                            </Trigger>
+
+                            <!-- Выбор (IsChecked) -->
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="InnerCircle" Property="Visibility" Value="Visible"/>
+                                <Setter Property="Background" Value="#E0E7FF"/>
+                                <Setter Property="BorderBrush" Value="#138808"/>
+                                <Setter Property="Foreground" Value="#138808"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Window.Resources>
 
     <!-- ОСНОВНОЙ КОНТЕЙНЕР -->
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+
+
             <!-- Панель действий -->
             <RowDefinition Height="*"/>
+
             <!-- DataGrid -->
             <RowDefinition Height="5"/>
+
             <!-- Прогресс-бар -->
         </Grid.RowDefinitions>
 
@@ -168,6 +248,7 @@
         <!-- ========================================== -->
         <Border  Grid.Row="0" Margin="0,0,0,15" Background="White">
             <Grid>
+
                 <!-- 
                    ВАЖНО: 4 колонки одинаковой ширины (*) + 3 разделителя (10)
                    Колонка 0: Кнопка "Загрузить"
@@ -192,6 +273,10 @@
                     <ColumnDefinition Width="10"/>
                     <!-- 5: Отступ -->
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                    <!-- 5: Отступ -->
+                    <ColumnDefinition Width="*"/>
+
                     <!-- 6: Блок 3 -->
                 </Grid.ColumnDefinitions>
 
@@ -353,6 +438,46 @@ Grid.Row="0"/>
                             <RadioButton GroupName="townChecked" x:Name="NOVOP" Tag="5" Content="Кировское" Style="{StaticResource radioButtonStyle}"/>
                             <RadioButton GroupName="townChecked" x:Name="MANUAL" Tag="6" Content="Ручной ввод" Style="{StaticResource radioButtonStyle}" />
                         </WrapPanel>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="7" 
+                    Background="WhiteSmoke"
+                    BorderBrush="#E5E7EB" 
+                    BorderThickness="1" 
+                    CornerRadius="8" 
+                    Padding="15" Grid.ColumnSpan="2" Margin="10,0,0,0">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <!-- Кнопки -->
+                            <!-- Заголовок -->
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Text="Выбор юрисконсульта" 
+                            FontWeight="Bold" 
+                            FontSize="13" 
+                            Foreground="#4B5563" 
+                            TextWrapping="Wrap"
+                            TextAlignment="Center"
+                            Margin="0,0,0,12"
+                            Grid.Row="0"/>
+
+                        <Grid Grid.Row="3">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="5"/>
+                                <!-- Небольшой отступ между кнопками -->
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <RadioButton GroupName="lawyerChecked" x:Name="LOVANNIKOV" Tag="1" Content="С. В. Ловянников" Style="{StaticResource newradioButtonStyle}"
+VerticalAlignment="Stretch" Grid.Row="0"  HorizontalAlignment="Stretch" />
+
+                            <RadioButton GroupName="lawyerChecked" x:Name="KOROL" Tag="2" Content="О. А. Король" Style="{StaticResource newradioButtonStyle}"
+VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Grid.Row="2" />
+                        </Grid>
                     </Grid>
                 </Border>
 
@@ -647,7 +772,7 @@ Grid.Row="0"/>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- Суммы: выравнивание по правому краю -->
+                <!-- 21 Суммы: выравнивание по правому краю -->
                 <DataGridTextColumn Binding="{Binding Debt, StringFormat=N2}" Width="110">
                     <DataGridTextColumn.Header>
                         <TextBlock Text="Основной долг"  TextAlignment="Center"/>
@@ -658,6 +783,8 @@ Grid.Row="0"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
+
+                <!-- 22 пени: выравнивание по правому краю -->
 
                 <DataGridTextColumn Binding="{Binding Punishment, StringFormat=N2}" Width="110">
                     <DataGridTextColumn.Header>
@@ -670,6 +797,8 @@ Grid.Row="0"/>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
+                <!-- 23 госпошлина: выравнивание по правому краю -->
+
                 <DataGridTextColumn Binding="{Binding Duty, StringFormat=N2}" Width="130">
                     <DataGridTextColumn.Header>
                         <TextBlock Text="Госпошлина"  TextAlignment="Center"/>
@@ -680,6 +809,8 @@ Grid.Row="0"/>
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
+
+                <!-- 24 общая сумма: выравнивание по правому краю -->
 
                 <DataGridTextColumn Binding="{Binding AmountSum, StringFormat=N2}" Width="130">
                     <DataGridTextColumn.Header>
@@ -692,7 +823,7 @@ Grid.Row="0"/>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
 
-                <!-- Документ -->
+                <!-- 25 документ примечание: выравнивание по правому краю -->
                 <DataGridTextColumn Binding="{Binding DocumentReference}" Width="Auto" MinWidth="160">
                     <DataGridTextColumn.Header>
                         <TextBlock Text="Документ"  TextAlignment="Center"/>
@@ -711,6 +842,7 @@ Grid.Row="0"/>
         <ProgressBar x:Name="progressBar1"
                      Visibility="Collapsed"
                      Height="5"
+                     BorderThickness="5"
                      Grid.Row="2"
                      Grid.Column="0"
                      Grid.ColumnSpan="7"

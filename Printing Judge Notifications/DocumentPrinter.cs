@@ -2,10 +2,11 @@
 using DocumentFormat.OpenXml.Wordprocessing;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
-using System.Globalization;
 
 namespace Printing_Judge_Notifications
 {
@@ -78,7 +79,7 @@ namespace Printing_Judge_Notifications
             return (surname, name, patronymicBase, suffix);
         }
 
-        public void GenerateTemplate(string templatePath, string outputPath, OwnerData data, int townNumber)
+        public void GenerateTemplate(string templatePath, string outputPath, OwnerData data, int selectedLower, int townNumber)
         {
             string AddPart(string current, string prefix, string value)
             {
@@ -107,6 +108,7 @@ namespace Printing_Judge_Notifications
             fullAddress = AddPart(fullAddress, ", ком. ", data.Room);
 
             // --- 2. ПОДГОТОВКА ФИО (ИСПРАВЛЕННАЯ ЛОГИКА) ---
+            string document = data?.DocumentReference ?? "";
             string fullName = data?.FullName ?? "";
             if (string.IsNullOrWhiteSpace(fullName))
             {
@@ -136,19 +138,27 @@ namespace Printing_Judge_Notifications
             }
             else if (fullName.Contains("/"))
             {
+                // разбивка
                 isSlashSeparator = true;
                 var splitBySlash = fullName.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
                 if (splitBySlash.Length >= 2)
                 {
-                    parentRaw = splitBySlash[0].Trim();
-                    childRaw = splitBySlash[1].Trim();
+                    string[] owners = new string[splitBySlash.Length];
+
+                    for (int i = 0; i < splitBySlash.Length; i++)
+                    {
+                        owners[i] = splitBySlash[i].Trim();
+                        MessageBox.Show(owners[i]);
+                    }
                 }
                 else
                 {
-                    // Если слэш есть, но частей мало - считаем всё ребенком
+                    // Если слэш есть, но частей мало — считаем всё ребёнком
                     childRaw = fullName;
                 }
             }
+
             else
             {
                 // Нет разделителей - считаем всё одним человеком (ребенком)
@@ -228,7 +238,6 @@ namespace Printing_Judge_Notifications
                 if (!string.IsNullOrEmpty(name)) partsList.Add(name);
                 if (!string.IsNullOrEmpty(patrBase)) partsList.Add(patrBase);
                 if (!string.IsNullOrEmpty(suffix)) partsList.Add(suffix);
-
                 return string.Join(" ", partsList);
             }
 
@@ -242,11 +251,17 @@ namespace Printing_Judge_Notifications
                 genitiveCaseParentFullName = BuildFullName(
                     declinedParentSurname, declinedParentSecondSurname,
                     declinedParentName, declinedParentPatronymic, parentSuffix);
+                genitiveCaseParentFullName =  Regex.Replace(genitiveCaseParentFullName, @"(,\s*)([a-zа-яё])",
+    m => m.Groups[1].Value + m.Groups[2].Value.ToUpper());
             }
 
-            // Префикс «проживающего/проживающей»
             string childFullNameForGenderCheck = (childPatronymicBase + " " + childSuffix).Trim();
+
+            
+            // Префикс «проживающего/проживающей»
             string livingAtString = RussianDeclension.GetLivingAt(childFullNameForGenderCheck);
+
+          
             var orderNumber = data.OrderNumber.ToString();
 
             string c_documentType = "";
@@ -279,6 +294,18 @@ namespace Printing_Judge_Notifications
             string officer = "";
             string officer_address = "";
             string officer_street = "";
+            string lawyer = "";
+            string documentReference = "";
+
+            switch (selectedLower)
+            {
+                case 1:
+                    lawyer = "C. В. Ловянников";
+                    break;
+                case 2:
+                    lawyer = "О. А. Король";
+                    break;
+            }
 
             switch (townNumber)
             {
@@ -329,6 +356,15 @@ namespace Printing_Judge_Notifications
                     break;
             }
 
+
+
+            string childInfo = "";
+            if (document.ToString() == "")
+           
+                childInfo = genitiveCaseChildFullName.Trim();
+            else 
+                childInfo = genitiveCaseChildFullName.Trim() + ", " + document.ToString();
+
             var replacements = new Dictionary<string, string>
             {
                 {"{{TODAYDATE}}", DateTime.Now.Date.ToString("dd.MM.yyyy")},
@@ -338,13 +374,15 @@ namespace Printing_Judge_Notifications
                 {"{{i_DOCUMENTTYPE}}", i_documentType.Trim() ?? "" },
                 {"{{LIVINGAT}}", livingAtString.Trim() ?? ""},
                 {"{{ORDERNUMBER}}", orderNumber.Trim() ?? ""},
-                {"{{CHILD_FULLNAME}}", genitiveCaseChildFullName.Trim() ?? ""},
+                {"{{CHILD_FULLNAME}}", childInfo ?? ""},
                 {"{{PARENT_FULLNAME}}", !string.IsNullOrEmpty(genitiveCaseParentFullName) ? genitiveCaseParentFullName.Trim() : ""},
                 {"{{ADDRESS}}", fullAddress.Trim()},
                 {"{{PLACEMENT}}", placement },
-                {"{{OFFICER}}", officer}    ,
+                {"{{OFFICER}}", officer},
+                {"{{COMPANYLOWER}}", lawyer},
                 {"{{OFFICER_ADDRESS}}", officer_address},
-                {"{{OFFICER_STREET}}", officer_street}
+                {"{{OFFICER_STREET}}", officer_street},
+                {"{{APPENDIX}}", documentReference},
             };
 
             InitiateDocument(templatePath, outputPath, replacements);

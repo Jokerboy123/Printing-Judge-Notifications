@@ -8,8 +8,8 @@ namespace Printing_Judge_Notifications
         private static bool IsNonDeclinableSuffix(string word)
         {
             if (string.IsNullOrWhiteSpace(word)) return false;
-            string lower = word.ToLower(CultureInfo.InvariantCulture);
-            return lower == "оглы" || lower == "кызы";
+            string lawyer = word.ToLower(CultureInfo.InvariantCulture);
+            return lawyer == "оглы" || lawyer == "кызы";
         }
 
         public static string DeclineSurname(string surname)
@@ -200,8 +200,8 @@ namespace Printing_Judge_Notifications
 
         private static bool IsRussianConsonant(char c)
         {
-            char lower = char.ToLower(c);
-            return !"аеёиоуыэюя".Contains(lower);
+            char lawyer = char.ToLower(c);
+            return !"аеёиоуыэюя".Contains(lawyer);
         }
     }
 }

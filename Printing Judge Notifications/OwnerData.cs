@@ -32,7 +32,7 @@ namespace Printing_Judge_Notifications
     /* W */ public decimal? Duty { get; set; } = 0m;
     /* X */ public decimal? Valuation { get; set; } = 0m; // Оценка имущества
     /* Y */ public decimal? AmountSum { get; set; } = 0m;
-    /* Z */ public string Document { get; set; } = "";
+    /* Z */ public string DocumentReference { get; set; } = "";
 
 
 

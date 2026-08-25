@@ -70,6 +70,8 @@ namespace Printing_Judge_Notifications
 
                 // ЭТАП 1: подготовка (5%)
                 UpdateProgress(5);
+               
+
 
                 var result = await Task.Run(() =>
                 {
@@ -81,6 +83,7 @@ namespace Printing_Judge_Notifications
                     if (range == null)
                         return tempList;
 
+                    UpdateProgress(10);
                     var rows = range.RowsUsed().Skip(1).ToList();
                     int totalRows = rows.Count;
                     int processed = 0;
@@ -89,6 +92,7 @@ namespace Printing_Judge_Notifications
                         return tempList;
 
                     var culture = System.Globalization.CultureInfo.GetCultureInfo("ru-RU");
+                    UpdateProgress(20);
 
                     foreach (var row in rows)
                     {
@@ -131,11 +135,12 @@ namespace Printing_Judge_Notifications
                                 Valuation = GetDecimalFast(cellsList, 23, culture),
                                 AmountSum = GetDecimalFast(cellsList, 24, culture),
 
-                                Document = GetStringFast(cellsList, 25)
+                                DocumentReference = GetStringFast(cellsList, 25),
                             };
 
                             tempList.Add(data);
                         }
+                        
                         catch (Exception)
                         {
                             // Пропускаем проблемные строки
@@ -143,7 +148,6 @@ namespace Printing_Judge_Notifications
 
                        
                     }
-
                     return tempList;
                 });
 
@@ -152,7 +156,7 @@ namespace Printing_Judge_Notifications
                 {
                     _rows.Add(item);
                 }
-                UpdateProgress(80);
+               UpdateProgress(75);
 
                 // ЭТАП 3: финальная привязка и завершение (10%)
                 dataGrid.ItemsSource = _rows;
@@ -246,44 +250,56 @@ namespace Printing_Judge_Notifications
             var buttons = new[] { KURSK, GEO, SOVET, STEPN, NOVOP, MANUAL };
             var selected = buttons.FirstOrDefault(rb => rb.IsChecked == true);
 
-            // Определяем, разрешена ли печать
-            bool canPrint = selected != null && selected != MANUAL;
-
-            // Применяем состояние ко всем кнопкам
-            print_p_btn.IsEnabled = canPrint;
-            print_v_btn.IsEnabled = canPrint;
-
-            // Показываем сообщение только если печать запрещена И была выбрана конкретная кнопка
-            if (selected == MANUAL || canPrint==false)
+            if (selected == null)
             {
                 MessageBox.Show(
-                    "Перед печатью создайте документ WORD заполните поля об отделении судебных приставов вручную в созданном документе!",
+                    "Необходимо выбрать отделение!",
+                    "Необходимо выбрать отделение!",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
+               
+                return 0;
+            }
+
+            if (selected == MANUAL)
+            {
+                MessageBox.Show(
+                    "Перед печатью создайте документ WORD, заполните поля об отделении судебных приставов вручную!",
                     "Требуется ручное заполнение",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning
-
                 );
-
-                print_p_btn.IsEnabled = true;
-                print_v_btn.IsEnabled = true;
-
-                return 0;
-                
-
             }
 
-            
+            print_p_btn.IsEnabled = true;
+            print_v_btn.IsEnabled = true;
+
+            return int.TryParse(selected.Tag?.ToString(), out int townNumber) ? townNumber : 0;
+        }
+
+        private int GetCheckedLawyerNumber()
+        {
+            var lawyers = new[] { LOVANNIKOV, KOROL };
+            var selected = lawyers.FirstOrDefault(rb => rb.IsChecked == true);
 
             if (selected == null)
             {
-                MessageBox.Show("Необходимо выбрать отделение!");
+                MessageBox.Show(
+                                   "Необходимо выбрать юрисконсульта!",
+                                   "Необходимо выбрать отделение!",
+                                   MessageBoxButton.OK,
+                                   MessageBoxImage.Warning
+                               );
                 return 0;
             }
-           if(int.TryParse(selected.Tag?.ToString(), out int townNumber))
-              return townNumber;
 
-            return 0;
+            print_p_btn.IsEnabled = true;
+            print_v_btn.IsEnabled = true;
+
+            return int.TryParse(selected.Tag?.ToString(), out int lawyerNumber) ? lawyerNumber : 0;
         }
+
         private void InitiationIP_PDF_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = dataGrid.SelectedItems.Cast<OwnerData>().ToList();
@@ -298,7 +314,8 @@ namespace Printing_Judge_Notifications
             {
 
                 int townNumber = GetCheckedTownNumber();
-                if (townNumber == 0) return; // ничего не выбрано
+                int selectedLower = GetCheckedLawyerNumber();
+                if (townNumber == 0 || selectedLower == 0) return; // ничего не выбрано
 
                 string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
 
@@ -325,7 +342,7 @@ namespace Printing_Judge_Notifications
                     string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
                     string fileName = $"Заявление о возбуждении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
                     string outputPath = Path.Combine(outputDir, fileName);
-                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
+                    printer.GenerateTemplate(templatePath, outputPath, data, selectedLower, townNumber);
 
                     Process.Start(new ProcessStartInfo
                     {
@@ -357,7 +374,9 @@ namespace Printing_Judge_Notifications
             {
 
                 int townNumber = GetCheckedTownNumber();
-                if (townNumber == 0) return; // ничего не выбрано
+                int selectedLower = GetCheckedLawyerNumber();
+                if (townNumber == 0 || selectedLower == 0) return; // ничего не выбрано
+
 
 
                 string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
@@ -387,7 +406,7 @@ namespace Printing_Judge_Notifications
                     string fileName = $"Заявление о возбуждении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
                     string outputPath = Path.Combine(outputDir, fileName);
 
-                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
+                    printer.GenerateTemplate(templatePath, outputPath, data, selectedLower, townNumber);
                     Thread.Sleep(500);
 
                     Process.Start(new ProcessStartInfo
@@ -420,7 +439,8 @@ namespace Printing_Judge_Notifications
             {
 
                 int townNumber = GetCheckedTownNumber();
-                if (townNumber == 0) return; // ничего не выбрано
+                int selectedLower = GetCheckedLawyerNumber();
+                if (townNumber == 0 || selectedLower == 0) return; // ничего не выбрано
 
 
                 string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
@@ -435,49 +455,64 @@ namespace Printing_Judge_Notifications
                     templatePath = Path.Combine(baseDir, "TEMPLATE_CANCEL_ADULT.docx");
                 }
                 string outputDir = Path.Combine(baseDir, "Output");
-                Directory.CreateDirectory(outputDir); 
+                Directory.CreateDirectory(outputDir);
+
+               //if (data.FullName.Contains("/"))
+               // {
+               //     var splitBySlash = data.FullName.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+
+               //     if (splitBySlash.Length >= 2)
+               //     {
+               //         string[] owners = new string[splitBySlash.Length];
+               //         var declinedOwners = new List<string>();
+
+               //         for (int i = 0; i < splitBySlash.Length; i++)
+               //         {
+               //             owners[i] = splitBySlash[i].Trim();
+               //             declinedOwners[i] += RussianDeclension.DeclineName(owners[i]);
+               //             MessageBox.Show(declinedOwners[i]);
+               //         }
+               //     }
 
 
-                if (!File.Exists(templatePath))
-                {
-                    MessageBox.Show($"Шаблон не найден в папке {templatePath}");
-                    return;
-                }
-                try
-                {
-                    var printer = new DocumentPrinter();
-
-                    // 3. Формируем безопасное имя файла (убираем запрещенные символы из ФИО)
-                    string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
-                    string fileName = $"Заявление_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
-                    string outputPath = Path.Combine(outputDir, fileName);
-
-                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
-
-                    Process.Start(new ProcessStartInfo
+                    if (!File.Exists(templatePath))
                     {
-                        FileName = outputPath,
-                        UseShellExecute = true,
-                        Verb = "Open",
+                        MessageBox.Show($"Шаблон не найден в папке {templatePath}");
+                        return;
+                    }
+                    try
+                    {
+                        var printer = new DocumentPrinter();
 
-                    });
+                        // 3. Формируем безопасное имя файла (убираем запрещенные символы из ФИО)
+                        string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
+                        string fileName = $"Заявление_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
+                        string outputPath = Path.Combine(outputDir, fileName);
+
+                        printer.GenerateTemplate(templatePath, outputPath, data, selectedLower, townNumber);
+
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = outputPath,
+                            UseShellExecute = true,
+                            Verb = "Open",
+
+                        });
 
 
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Произошла ошибка при создании документа:\n{ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                }
-            }
+            
         }
 
         private void CancelIP_PrintOut_Click(object sender, RoutedEventArgs e)
         {
             var selectedItems = dataGrid.SelectedItems.Cast<OwnerData>().ToList();
-
-            
-
             if (!selectedItems.Any())
             {
                 MessageBox.Show("Выберите хотя бы одну строку в таблице!");
@@ -489,7 +524,8 @@ namespace Printing_Judge_Notifications
             {
 
                 int townNumber = GetCheckedTownNumber();
-                if (townNumber == 0) return; // ничего не выбрано
+                int selectedLower = GetCheckedLawyerNumber();
+                if (townNumber == 0 || selectedLower == 0) return; // ничего не выбрано
 
 
                 string baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "TEMPLATES");
@@ -507,7 +543,6 @@ namespace Printing_Judge_Notifications
                 Directory.CreateDirectory(outputDir);
 
 
-                
                 if (!File.Exists(templatePath))
                 {
                     MessageBox.Show($"Шаблон не найден в папке {templatePath}");
@@ -516,20 +551,23 @@ namespace Printing_Judge_Notifications
                 try
                 {
                     var printer = new DocumentPrinter();
+
+                    // 3. Формируем безопасное имя файла (убираем запрещенные символы из ФИО)
                     string safeName = Regex.Replace(data.FullName ?? "unknown", @"[\\/:*?""<>|]", "_");
-                    string fileName = $"Заявление о прекращении ИП_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
+                    string fileName = $"Заявление_{safeName}_{DateTime.Now:yyyyMMdd_HHmmss}.docx";
                     string outputPath = Path.Combine(outputDir, fileName);
 
-                    printer.GenerateTemplate(templatePath, outputPath, data, townNumber);
-                    Thread.Sleep(500);
+                    printer.GenerateTemplate(templatePath, outputPath, data, selectedLower, townNumber);
 
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = outputPath,
                         UseShellExecute = true,
-                        Verb = "print",
+                        Verb = "Print",
 
                     });
+
+
                 }
                 catch (Exception ex)
                 {
@@ -538,5 +576,7 @@ namespace Printing_Judge_Notifications
                 }
             }
         }
-        }
+
+       
+    }
 }
