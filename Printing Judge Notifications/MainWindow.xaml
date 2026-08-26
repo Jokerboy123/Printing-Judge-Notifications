@@ -10,7 +10,6 @@
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized">
 <!-- Проверка привязки веток -->
-    <!-- еще одна Проверка привязки веток -->
 <!--fff-->
     <!-- СТИЛИ -->
     <Window.Resources>
