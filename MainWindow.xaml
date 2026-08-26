@@ -9,7 +9,7 @@
         Width="1000" Height="700"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized">
-
+<!-- Проверка привязки веток -->
     <!-- СТИЛИ -->
     <Window.Resources>
         <!-- Стиль главной (зеленой) кнопки -->
